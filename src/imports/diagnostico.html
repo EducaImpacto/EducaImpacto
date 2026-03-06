@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnóstico - Educa Impacto</title>
+  <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>Educa Impacto</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Início</a></li>
+        <li><a href="#">Funcionalidades</a></li>
+        <li><a href="#">Sobre</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="diagnostico">
+    <h2>Diagnóstico Inicial</h2>
+    <p>Responda algumas perguntas para personalizarmos sua trilha de aprendizagem:</p>
+
+    <!-- Formulário simulado -->
+    <form onsubmit="enviarFormulario(event)">
+      <label for="objetivo">Qual é o seu principal objetivo?</label><br />
+      <select id="objetivo" name="objetivo" required>
+        <option value="">-- Escolha uma opção --</option>
+        <option value="empreender">Quero empreender</option>
+        <option value="aprender">Aprender mais sobre negócios</option>
+        <option value="melhorar">Melhorar minha ideia atual</option>
+      </select><br /><br />
+
+      <label for="experiencia">Você já tem alguma experiência?</label><br />
+      <input type="radio" name="experiencia" value="sim" required /> Sim
+      <input type="radio" name="experiencia" value="nao" required /> Não<br /><br />
+
+      <label for="tempo">Quanto tempo por semana você pode dedicar?</label><br />
+      <input type="range" min="1" max="20" value="5" id="tempo" name="tempo" oninput="atualizarValor(this.value)" />
+      <span id="tempoValor">5 horas</span><br /><br />
+
+      <button type="submit">Gerar Trilha Personalizada</button>
+    </form>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 Educa Impacto - Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    function atualizarValor(valor) {
+      document.getElementById("tempoValor").textContent = valor + " horas";
+    }
+
+    function enviarFormulario(event) {
+      event.preventDefault();
+      alert("Obrigado! Sua trilha está sendo personalizada com IA...");
+      // Aqui você poderia redirecionar para outra página, ex: trilha.html
+      window.location.href = 'trilha.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sua Trilha Personalizada - Educa Impacto</title>
+    <link rel="stylesheet" href="./styles/style.css" />
+</head>
+
+<body>
+    <header class="header">
+        <h1>Educa Impacto</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="diagnostico.html">Diagnóstico</a></li>
+                <li><a href="#">Sobre</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="trilha">
+        <h2>🎓 Sua Trilha de Aprendizagem</h2>
+        <p>Abaixo estão os módulos recomendados com base no seu perfil:</p>
+
+        <!-- Cards da trilha -->
+        <section class="trilha-cards">
+            <div class="trilha-card">
+                <h3>Módulo 1: Mentalidade Empreendedora</h3>
+                <p>Aprenda os fundamentos de uma mentalidade voltada à inovação, superação de desafios e visão de
+                    oportunidade.</p>
+                <button onclick="iniciarModulo('Mentalidade Empreendedora')">Iniciar</button>
+            </div>
+
+            <div class="trilha-card">
+                <h3>Módulo 2: Validação de Ideias</h3>
+                <p>Descubra como validar suas ideias com testes práticos, pesquisas e feedbacks reais do mercado.</p>
+                <button onclick="irParaGamificacao()">Iniciar</button>
+            </div>
+
+            <div class="trilha-card">
+                <h3>Módulo 3: Plano de Negócio</h3>
+                <p>Monte seu plano de negócio passo a passo com base nos conhecimentos adquiridos nos módulos
+                    anteriores.</p>
+                <button onclick="irParaGamificacao()">Iniciar</button>
+            </div>
+        </section>
+
+        <p class="trilha-footer">* Sua trilha é atualizada automaticamente conforme seu desempenho.</p>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Educa Impacto - Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        function iniciarModulo(modulo) {
+            localStorage.setItem("moduloSelecionado", modulo);
+            window.location.href = "gamificacao.html";
+        }
+    </script>
+</body>
+
+</html>
