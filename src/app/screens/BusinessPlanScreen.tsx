@@ -3,18 +3,16 @@ import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { CheckCircle2, Edit, FileDown, MessageSquare, Share2, Star } from 'lucide-react';
 import { motion } from 'motion/react';
-import type { MissionAnswer } from '../App';
+import { DiagnosticData } from './DiagnosticScreen';
 
 type ProfileType = 'iniciante' | 'intermediario' | 'avancado';
 
-interface DiagnosticData {
-  objetivo: string;
-  experiencia: string;
-  planoHoje: string;
-  ferramenta: string;
-  planoNegocios: string;
-  score: number;
-  profileType: ProfileType;
+interface MissionAnswer {
+  missionId: string;
+  moduleTitle: string;
+  missionTitle: string;
+  answer: string;
+  planBlocks: string[];
 }
 
 interface BusinessPlanScreenProps {
@@ -80,7 +78,7 @@ export function BusinessPlanScreen({
     return planSections.map((section) => ({
       ...section,
       answers: answers.filter((answer) =>
-        answer.planBlocks.some((block) => section.blocks.includes(block))
+        answer.planBlocks.some((block: string) => section.blocks.includes(block))
       ),
     }));
   }, [answers]);
@@ -129,7 +127,7 @@ export function BusinessPlanScreen({
               className="flex justify-center gap-3 flex-wrap"
             >
               <Badge type="trophy" label="Jornada Completa" color="green" />
-              <Badge type="star" label={`Perfil: ${profileLabels[diagnosticData.profileType]}`} color="orange" />
+              <Badge type="star" label={`Perfil: ${profileLabels[diagnosticData.nivel]}`} color="orange" />
               <Badge type="zap" label="Insígnia: Plano Concluído" color="blue" />
             </motion.div>
           </div>
