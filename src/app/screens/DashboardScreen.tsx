@@ -3,15 +3,8 @@ import { Button } from '../components/Button';
 import { ModuleCard } from '../components/ModuleCard';
 import { LevelIndicator } from '../components/LevelIndicator';
 import { ProgressBar } from '../components/ProgressBar';
-import { Sparkles, FileDown, History } from 'lucide-react';
-
-interface Module {
-  id: number;
-  title: string;
-  description: string;
-  completed: boolean;
-  locked: boolean;
-}
+import { BarChart3, FileDown, History, Sparkles } from 'lucide-react';
+import type { Module } from '../App';
 
 interface DashboardScreenProps {
   level: number;
@@ -19,6 +12,8 @@ interface DashboardScreenProps {
   nextLevelXp: number;
   overallProgress: number;
   modules: Module[];
+  totalMissions: number;
+  completedMissions: number;
   canGeneratePlan: boolean;
   onModuleClick: (moduleId: number) => void;
   onGeneratePlan: () => void;
@@ -30,23 +25,25 @@ export function DashboardScreen({
   nextLevelXp,
   overallProgress,
   modules,
+  totalMissions,
+  completedMissions,
   canGeneratePlan,
   onModuleClick,
   onGeneratePlan,
 }: DashboardScreenProps) {
-  const completedModules = modules.filter(m => m.completed).length;
+  const completedModules = modules.filter((module) => module.completed).length;
+  const nextModule = modules.find((module) => !module.completed && !module.locked);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-sm text-gray-600">Acompanhe seu progresso</p>
+                <h1 className="text-2xl font-bold text-gray-900">Dashboard da Trilha</h1>
+                <p className="text-sm text-gray-600">Acompanhe seu progresso na construção do plano de negócios</p>
               </div>
             </div>
           </div>
@@ -55,27 +52,50 @@ export function DashboardScreen({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Coluna Principal */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Progresso Geral */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Progresso da Trilha</h2>
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Progresso Geral</h2>
+                  <p className="text-sm text-gray-600">Uma missão concluída por vez, sem sobrecarga.</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-600">{overallProgress}%</div>
+                  <div className="text-xs text-gray-500">da trilha</div>
+                </div>
+              </div>
               <ProgressBar progress={overallProgress} height="lg" />
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-gray-600">{completedModules} de {modules.length} módulos concluídos</span>
-                <span className="font-semibold text-blue-600">{modules.length - completedModules} restantes</span>
+                <span className="text-gray-600">{completedMissions} de {totalMissions} missões concluídas</span>
+                <span className="font-semibold text-blue-600">{completedModules} de {modules.length} etapas completas</span>
               </div>
             </div>
 
-            {/* Módulos */}
+            {nextModule && (
+              <div className="bg-gradient-to-r from-blue-600 to-emerald-600 rounded-2xl shadow-lg p-8 text-white">
+                <h2 className="text-2xl font-bold mb-2">Continue sua próxima missão</h2>
+                <p className="text-blue-100 mb-6">
+                  Próxima etapa liberada: {nextModule.title}. Cada resposta aproxima seu plano de negócios da versão final.
+                </p>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => onModuleClick(nextModule.id)}
+                  className="bg-white text-blue-600 hover:bg-blue-50"
+                >
+                  Continuar Trilha
+                </Button>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Seus Módulos</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Etapas da Trilha Iniciante</h2>
               <div className="space-y-4">
                 {modules.map((module) => (
                   <ModuleCard
                     key={module.id}
                     title={module.title}
-                    description={module.description}
+                    description={`${module.description} (${module.missions.length} missões)`}
                     completed={module.completed}
                     locked={module.locked}
                     onClick={() => onModuleClick(module.id)}
@@ -84,18 +104,17 @@ export function DashboardScreen({
               </div>
             </div>
 
-            {/* Gerar Plano de Negócios */}
             {canGeneratePlan && (
               <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-lg p-8 text-white">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-2">Parabéns! 🎉</h2>
+                    <h2 className="text-2xl font-bold mb-2">Plano de Negócios desbloqueado</h2>
                     <p className="text-green-100 mb-6">
-                      Você completou todos os módulos e está pronto para gerar seu plano de negócios profissional.
+                      Você completou as 20 missões. Agora a IA organiza suas respostas em um plano estruturado.
                     </p>
-                    <Button 
-                      variant="secondary" 
-                      size="lg" 
+                    <Button
+                      variant="secondary"
+                      size="lg"
                       onClick={onGeneratePlan}
                       className="bg-white text-green-600 hover:bg-green-50"
                     >
@@ -108,35 +127,34 @@ export function DashboardScreen({
             )}
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Indicador de Nível */}
             <LevelIndicator level={level} xp={xp} nextLevelXp={nextLevelXp} />
 
-            {/* Estatísticas */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="font-bold text-gray-900 mb-4">Estatísticas</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                <h3 className="font-bold text-gray-900">Indicadores MVP</h3>
+              </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                  <span className="text-gray-600 text-sm">Módulos Concluídos</span>
-                  <span className="font-bold text-green-600">{completedModules}</span>
+                  <span className="text-gray-600 text-sm">Missões concluídas</span>
+                  <span className="font-bold text-green-600">{completedMissions}</span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                  <span className="text-gray-600 text-sm">Módulos Pendentes</span>
-                  <span className="font-bold text-orange-600">{modules.length - completedModules}</span>
+                  <span className="text-gray-600 text-sm">Missões pendentes</span>
+                  <span className="font-bold text-orange-600">{totalMissions - completedMissions}</span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-                  <span className="text-gray-600 text-sm">Nível Atual</span>
+                  <span className="text-gray-600 text-sm">Nível atual</span>
                   <span className="font-bold text-blue-600">{level}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 text-sm">XP Acumulado</span>
+                  <span className="text-gray-600 text-sm">XP acumulado</span>
                   <span className="font-bold text-purple-600">{xp}</span>
                 </div>
               </div>
             </div>
 
-            {/* Histórico de Downloads */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <History className="w-5 h-5 text-gray-600" />
@@ -147,14 +165,13 @@ export function DashboardScreen({
               </p>
             </div>
 
-            {/* Dica Motivacional */}
-            <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-6 border-2 border-blue-200">
+            <div className="bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl p-6 border-2 border-blue-200">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
                 <div>
                   <h4 className="font-bold text-blue-900 mb-2">Dica</h4>
                   <p className="text-sm text-blue-800">
-                    Complete os módulos em sequência para maximizar seu aprendizado e construir um plano de negócios sólido.
+                    Responda com exemplos concretos. Isso ajuda a gerar um plano mais claro, profissional e útil.
                   </p>
                 </div>
               </div>

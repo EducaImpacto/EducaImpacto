@@ -8,6 +8,7 @@ interface ModuleCompletedScreenProps {
   moduleTitle: string;
   xpGained: number;
   badgeLabel: string;
+  isLastModule?: boolean;
   onNext: () => void;
 }
 
@@ -15,6 +16,7 @@ export function ModuleCompletedScreen({
   moduleTitle, 
   xpGained, 
   badgeLabel, 
+  isLastModule = false,
   onNext 
 }: ModuleCompletedScreenProps) {
   return (
@@ -91,7 +93,7 @@ export function ModuleCompletedScreen({
             transition={{ delay: 0.7 }}
           >
             <Button variant="primary" size="lg" className="w-full" onClick={onNext}>
-              Próximo Módulo
+              {isLastModule ? 'Ver Dashboard' : 'Próximo Módulo'}
               <ArrowRight className="w-5 h-5 ml-2 inline" />
             </Button>
           </motion.div>
