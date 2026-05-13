@@ -1,14 +1,22 @@
 import React from 'react';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
-import { Trophy, Star, ArrowRight } from 'lucide-react';
+import { Trophy, Star, ArrowRight, Edit, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
+
+interface MissionAnswer {
+  missionId: string;
+  missionTitle: string;
+  answer: string;
+}
 
 interface ModuleCompletedScreenProps {
   moduleTitle: string;
   xpGained: number;
   badgeLabel: string;
   isLastModule?: boolean;
+  answers: MissionAnswer[];
+  onEditAnswer: (missionId: string) => void;
   onNext: () => void;
 }
 
@@ -17,6 +25,8 @@ export function ModuleCompletedScreen({
   xpGained, 
   badgeLabel, 
   isLastModule = false,
+  answers,
+  onEditAnswer,
   onNext 
 }: ModuleCompletedScreenProps) {
   return (
@@ -56,6 +66,37 @@ export function ModuleCompletedScreen({
           >
             {moduleTitle}
           </motion.p>
+
+          <motion.div
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.45 }}
+            className="mb-8 text-left"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <h3 className="text-lg font-bold text-gray-900">Respostas deste módulo</h3>
+            </div>
+
+            <div className="space-y-3">
+              {answers.map((answer) => (
+                <div key={answer.missionId} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex items-start justify-between gap-3 mb-1">
+                    <div className="text-sm font-semibold text-blue-700">{answer.missionTitle}</div>
+                    <button
+                      type="button"
+                      onClick={() => onEditAnswer(answer.missionId)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-900"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      Editar
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-700">{answer.answer}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
 
           {/* XP Ganho */}
           <motion.div

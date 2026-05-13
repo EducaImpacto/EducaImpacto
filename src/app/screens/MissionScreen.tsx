@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProgressBar } from '../components/ProgressBar';
 import { Sparkles, ArrowRight, Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -19,6 +19,8 @@ interface MissionScreenProps {
   progress: number;
   totalMissions: number;
   currentMissionNumber: number;
+  initialAnswer?: string;
+  isEditing?: boolean;
   onNext: (answer: string) => void;
 }
 
@@ -27,17 +29,24 @@ export function MissionScreen({
   progress,
   totalMissions,
   currentMissionNumber,
+  initialAnswer = '',
+  isEditing = false,
   onNext,
 }: MissionScreenProps) {
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState(initialAnswer);
   const [loadingIA, setLoadingIA] = useState(false);
   const [sugestaoIA, setSugestaoIA] = useState('');
   const [mostrarSugestao, setMostrarSugestao] = useState(false);
 
+  useEffect(() => {
+    setAnswer(initialAnswer);
+    setSugestaoIA('');
+    setMostrarSugestao(false);
+  }, [mission.id, initialAnswer]);
+
   const handleNext = () => {
     if (answer.trim()) {
       onNext(answer.trim());
-      setAnswer('');
       setSugestaoIA('');
       setMostrarSugestao(false);
     }
@@ -171,7 +180,7 @@ export function MissionScreen({
             disabled={!answer.trim()}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all duration-150 shadow hover:shadow-md text-base"
           >
-            Avançar missão
+            {isEditing ? 'Salvar resposta' : 'Avançar missão'}
             <ArrowRight className="w-5 h-5" />
           </button>
 

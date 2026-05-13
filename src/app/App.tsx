@@ -16,6 +16,8 @@ type Screen =
   | 'etapa-concluida'
   | 'business-plan';
 
+type EditReturnScreen = 'etapa-concluida' | 'business-plan';
+
 interface Mission {
   id: number;
   etapa: number;
@@ -247,6 +249,8 @@ function getPlanBlocksByEtapa(etapa: number): string[] {
 export default function App() {
   const [screen, setScreen] = useState<Screen>('landing');
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticData | null>(null);
+  const [editingMissionId, setEditingMissionId] = useState<number | null>(null);
+  const [editReturnScreen, setEditReturnScreen] = useState<EditReturnScreen>('business-plan');
 
   // Progresso na trilha
   const [etapaIndex, setEtapaIndex] = useState(0);   // 0..3
@@ -296,6 +300,14 @@ export default function App() {
       .filter((mission) => Boolean(mission.answer))
   );
 
+  const currentModuleAnswers = etapaAtual.missions
+    .map((mission) => ({
+      missionId: String(mission.id),
+      missionTitle: mission.title,
+      answer: respostas[mission.id],
+    }))
+    .filter((mission) => Boolean(mission.answer));
+
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleDiagnosticComplete = (data: DiagnosticData) => {
     setDiagnosticData(data);
@@ -309,6 +321,13 @@ export default function App() {
   };
 
   const handleNextMission = (answer: string) => {
+    if (editingMissionId !== null) {
+      setRespostas((prev) => ({ ...prev, [editingMissionId]: answer }));
+      setEditingMissionId(null);
+      setScreen(editReturnScreen);
+      return;
+    }
+
     // Salvar resposta
     setRespostas((prev) => ({ ...prev, [missaoAtual.id]: answer }));
 
@@ -343,6 +362,29 @@ export default function App() {
     alert('Em uma implementação completa, o PDF seria gerado aqui pela IA com todas as suas respostas!');
   };
 
+  const handleEditAnswer = (missionId: string, returnScreen: EditReturnScreen) => {
+    const missionIdNumber = Number(missionId);
+    if (Number.isNaN(missionIdNumber)) return;
+
+    const etapaFoundIndex = ETAPAS.findIndex((etapa) =>
+      etapa.missions.some((mission) => mission.id === missionIdNumber)
+    );
+
+    if (etapaFoundIndex === -1) return;
+
+    const missionFoundIndex = ETAPAS[etapaFoundIndex].missions.findIndex(
+      (mission) => mission.id === missionIdNumber
+    );
+
+    if (missionFoundIndex === -1) return;
+
+    setEtapaIndex(etapaFoundIndex);
+    setMissaoIndex(missionFoundIndex);
+    setEditingMissionId(missionIdNumber);
+    setEditReturnScreen(returnScreen);
+    setScreen('mission');
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
@@ -367,6 +409,8 @@ export default function App() {
           progress={progresso}
           totalMissions={TOTAL_MISSIONS}
           currentMissionNumber={missaoGlobalAtual}
+          initialAnswer={respostas[missaoAtual.id] ?? ''}
+          isEditing={editingMissionId !== null}
           onNext={handleNextMission}
         />
       )}
@@ -382,6 +426,8 @@ export default function App() {
           moduleTitle={etapaAtual.label}
           xpGained={etapaAtual.missions.reduce((acc, m) => acc + m.xpReward, 0)}
           badgeLabel={etapaAtual.badge}
+          answers={currentModuleAnswers}
+          onEditAnswer={(missionId) => handleEditAnswer(missionId, 'etapa-concluida')}
           onNext={handleNextEtapa}
         />
       )}
@@ -391,7 +437,7 @@ export default function App() {
           diagnosticData={diagnosticData}
           answers={businessPlanAnswers}
           onDownload={handleDownloadPlan}
-          onEdit={() => { setEtapaIndex(0); setMissaoIndex(0); setScreen('mission'); }}
+          onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
           onShare={() => alert('Compartilhamento disponível em breve!')}
           onBackToDashboard={() => setScreen('landing')}
         />

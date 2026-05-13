@@ -19,41 +19,31 @@ interface BusinessPlanScreenProps {
   diagnosticData: DiagnosticData;
   answers: MissionAnswer[];
   onDownload: () => void;
-  onEdit: () => void;
+  onEditAnswer: (missionId: string) => void;
   onShare: () => void;
   onBackToDashboard: () => void;
 }
 
 const planSections = [
   {
-    title: 'Sumário Executivo',
+    title: 'Contexto do Negócio',
     blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
     description: 'Síntese inicial do negócio, da motivação do empreendedor e da solução proposta.',
   },
   {
-    title: 'Descrição da Empresa',
-    blocks: ['Empreendedor e contexto', 'Operação básica'],
-    description: 'Contexto, missão inicial, recursos disponíveis e primeiros passos para começar.',
+    title: 'Cliente',
+    blocks: ['Cliente e mercado'],
+    description: 'Perfil do cliente, contexto de compra e cenário real onde o problema aparece.',
   },
   {
-    title: 'Análise de Mercado',
-    blocks: ['Cliente e mercado', 'Problema'],
-    description: 'Perfil do cliente, realidade atual, problema enfrentado e relevância da oportunidade.',
+    title: 'Problema',
+    blocks: ['Problema'],
+    description: 'Dor principal do cliente, frequência e impacto do problema no dia a dia.',
   },
   {
-    title: 'Plano de Marketing e Vendas',
-    blocks: ['Proposta de valor', 'Canais de venda e aquisição', 'Receita'],
-    description: 'Benefícios percebidos, canais para encontrar clientes e formato de geração de receita.',
-  },
-  {
-    title: 'Plano Operacional',
-    blocks: ['Produto / Serviço', 'Operação básica', 'Custos'],
-    description: 'Funcionamento diário, recursos necessários, custos iniciais e capacidade de entrega.',
-  },
-  {
-    title: 'Crescimento e Validação',
-    blocks: ['Crescimento', 'Problema', 'Receita'],
-    description: 'Pontos que precisam ser testados, oportunidades de melhoria e próximos passos.',
+    title: 'Solução e Viabilidade',
+    blocks: ['Proposta de valor', 'Operação básica', 'Custos', 'Receita'],
+    description: 'Solução proposta, operação inicial, custos para começar e modelo de receita.',
   },
 ];
 
@@ -67,21 +57,25 @@ export function BusinessPlanScreen({
   diagnosticData,
   answers,
   onDownload,
-  onEdit,
+  onEditAnswer,
   onShare,
   onBackToDashboard,
 }: BusinessPlanScreenProps) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
 
   const answersBySection = useMemo(() => {
-    return planSections.map((section) => ({
+    const answersPerSection = 5;
+
+    return planSections.map((section, index) => ({
       ...section,
-      answers: answers.filter((answer) =>
-        answer.planBlocks.some((block: string) => section.blocks.includes(block))
-      ),
+      answers: answers.slice(index * answersPerSection, (index + 1) * answersPerSection),
     }));
   }, [answers]);
+
+  const activeSection = answersBySection[activeSectionIndex] ?? answersBySection[0];
+  const activeSectionAnswerCount = activeSection?.answers.length ?? 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
@@ -141,33 +135,108 @@ export function BusinessPlanScreen({
                   Na integração final, esse conteúdo será refinado e exportado em PDF.
                 </p>
 
-                <div className="space-y-5">
-                  {answersBySection.map((section) => (
-                    <div key={section.title} className="border border-gray-200 rounded-2xl p-5">
-                      <div className="flex items-start gap-3 mb-4">
+                <div className="mb-5 rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur-sm">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                        Módulos da trilha
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Mostrando {activeSectionIndex + 1} de {answersBySection.length}
+                      </p>
+                    </div>
+                    <div className="text-right text-xs text-gray-500">
+                      <div className="font-semibold text-gray-700">{activeSectionAnswerCount} respostas</div>
+                      <div>do módulo atual</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+                    {answersBySection.map((section, index) => {
+                      const isActive = index === activeSectionIndex;
+                      const isComplete = section.answers.length === 5;
+
+                      return (
+                        <button
+                          key={section.title}
+                          type="button"
+                          onClick={() => setActiveSectionIndex(index)}
+                          className={`min-w-[180px] rounded-2xl px-4 py-3 text-left transition-all ${
+                            isActive
+                              ? 'bg-blue-600 text-white shadow-md'
+                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          <div className="text-sm font-bold">{section.title}</div>
+                          <div className={`mt-1 text-xs ${isActive ? 'text-blue-100' : 'text-gray-500'}`}>
+                            {section.answers.length}/5 respostas{isComplete ? ' concluído' : ''}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {activeSection && (
+                  <div className="border border-gray-200 rounded-2xl p-5">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
                         <div>
-                          <h3 className="font-bold text-gray-900">{section.title}</h3>
-                          <p className="text-sm text-gray-600">{section.description}</p>
+                          <h3 className="font-bold text-gray-900">{activeSection.title}</h3>
+                          <p className="text-sm text-gray-600">{activeSection.description}</p>
                         </div>
                       </div>
-
-                      <div className="space-y-3">
-                        {section.answers.slice(0, 4).map((answer) => (
-                          <div key={`${section.title}-${answer.missionId}`} className="bg-gray-50 rounded-xl p-4">
-                            <div className="text-sm font-semibold text-blue-700 mb-1">
-                              {answer.moduleTitle} - {answer.missionTitle}
-                            </div>
-                            <p className="text-sm text-gray-700">{answer.answer}</p>
-                          </div>
-                        ))}
-                        {section.answers.length === 0 && (
-                          <p className="text-sm text-gray-500">Sem respostas vinculadas a esta seção.</p>
-                        )}
+                      <div className="text-xs font-semibold text-gray-500">
+                        {activeSectionIndex + 1} de {answersBySection.length}
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="space-y-3">
+                      {activeSection.answers.map((answer) => (
+                        <div key={`${activeSection.title}-${answer.missionId}`} className="bg-gray-50 rounded-xl p-4">
+                          <div className="flex items-start justify-between gap-3 mb-1">
+                            <div className="text-sm font-semibold text-blue-700">
+                              {answer.missionTitle}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onEditAnswer(answer.missionId)}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-900"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                              Editar
+                            </button>
+                          </div>
+                          <p className="text-sm text-gray-700">{answer.answer}</p>
+                        </div>
+                      ))}
+                      {activeSection.answers.length === 0 && (
+                        <p className="text-sm text-gray-500">Sem respostas vinculadas a este módulo.</p>
+                      )}
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveSectionIndex((current) => Math.max(0, current - 1))}
+                        disabled={activeSectionIndex === 0}
+                      >
+                        Módulo anterior
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveSectionIndex((current) => Math.min(answersBySection.length - 1, current + 1))}
+                        disabled={activeSectionIndex === answersBySection.length - 1}
+                      >
+                        Próximo módulo
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <aside className="space-y-5">
@@ -175,12 +244,10 @@ export function BusinessPlanScreen({
                   <h3 className="font-bold text-blue-900 mb-3">Estrutura contemplada</h3>
                   <div className="space-y-2 text-sm text-blue-900">
                     {[
-                      'Sumário executivo',
-                      'Descrição da empresa',
-                      'Análise de mercado',
-                      'Plano de marketing',
-                      'Plano operacional',
-                      'Plano financeiro inicial',
+                      'Contexto do Negócio',
+                      'Cliente',
+                      'Problema',
+                      'Solução e Viabilidade',
                     ].map((item) => (
                       <div key={item} className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -211,9 +278,9 @@ export function BusinessPlanScreen({
                 Baixar PDF
               </Button>
 
-              <Button variant="outline" size="lg" className="w-full" onClick={onEdit}>
+              <Button variant="outline" size="lg" className="w-full" disabled>
                 <Edit className="w-5 h-5 mr-2 inline" />
-                Editar Respostas
+                Edite direto nos cards
               </Button>
 
               <Button variant="outline" size="lg" className="w-full" onClick={onShare}>

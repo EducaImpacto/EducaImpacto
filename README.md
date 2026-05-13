@@ -1,124 +1,88 @@
-# 🚀 Educa Impacto
+# Educa Impacto
 
-**Do sonho ao negócio com apoio da Inteligência Artificial**
+Plataforma de trilha empreendedora com gamificacao, missoes e consolidacao de respostas em um plano de negocios.
 
-O **Educa Impacto** é uma plataforma digital que utiliza **gamificação, microlearning e inteligência artificial** para ajudar pessoas a transformarem ideias em negócios estruturados.
+## Requisitos
 
-Através de uma **trilha gamificada de aprendizado**, o usuário aprende conceitos essenciais de empreendedorismo enquanto constrói, passo a passo, seu **plano de negócios**.
+- Node.js 18+
+- npm 9+
 
-Ao final da jornada, a plataforma gera automaticamente um **plano de negócios estruturado em PDF**, pronto para ser utilizado em apresentações, editais ou validação de projetos.
+## Como rodar o projeto
 
----
+1. Instale as dependencias:
 
-# 🎯 Problema
+```bash
+npm install
+```
 
-No Brasil, grande parte das pessoas empreende **por necessidade**, sem acesso a formação em gestão ou planejamento estratégico.
+2. Inicie em modo desenvolvimento:
 
-Isso gera:
-- negócios sem estrutura
-- alta taxa de mortalidade empresarial
-- dificuldade de acesso a crédito
-- baixa competitividade no mercado
+```bash
+npm run dev
+```
 
-Além disso, cursos tradicionais são:
-- longos
-- complexos
-- pouco aplicáveis à realidade de quem está começando.
+3. Abra no navegador o endereco exibido pelo Vite (normalmente `http://localhost:5173`).
 
----
+## Build de producao
 
-# 💡 Solução
+```bash
+npm run build
+```
 
-O **Educa Impacto** transforma o processo de aprendizado em uma **experiência prática e progressiva**, onde o usuário:
+O resultado sera gerado na pasta `dist/`.
 
-1️⃣ Aprende conceitos essenciais de empreendedorismo  
-2️⃣ Aplica imediatamente no próprio negócio  
-3️⃣ Avança em uma trilha gamificada  
-4️⃣ Recebe apoio de IA para melhorar suas respostas  
-5️⃣ Gera automaticamente seu **plano de negócios**
+## Leitura rapida da arquitetura
 
----
+Fluxo principal:
 
-# 🧠 Metodologia
+1. `landing`
+2. `diagnostic`
+3. `onboarding`
+4. `mission` (4 modulos x 5 missoes)
+5. `etapa-concluida` (resumo ao fim de cada modulo)
+6. `business-plan` (consolidacao final das respostas)
 
-O projeto utiliza o modelo de **Construção Progressiva do Negócio**, baseado em dois pilares:
+Arquivo de orquestracao de estado e navegação:
 
-### 📚 Trilha de conhecimento
-Ensina conceitos essenciais de forma rápida e prática.
+- `src/app/App.tsx`
 
-### 📝 Missões aplicadas
-Perguntas abertas que ajudam a construir o plano de negócios de forma natural.
+Telas principais:
 
-O usuário **não sente que está preenchendo um formulário**, mas sim **cumprindo missões que fazem seu negócio avançar**.
+- `src/app/screens/LandingPage.tsx`
+- `src/app/screens/DiagnosticScreen.tsx`
+- `src/app/screens/OnboardingScreen.tsx`
+- `src/app/screens/MissionScreen.tsx`
+- `src/app/screens/ModuleCompletedScreen.tsx`
+- `src/app/screens/BusinessPlanScreen.tsx`
 
----
+Componentes reutilizaveis:
 
-# 🕹️ Gamificação
+- `src/app/components/`
+- `src/app/components/ui/` (biblioteca base de UI)
 
-Para aumentar o engajamento, a plataforma utiliza elementos de gamificação:
+Estilos:
 
-- XP (pontos de experiência)
-- níveis de progresso
-- badges / insígnias
-- módulos desbloqueáveis
-- feedback imediato
+- `src/styles/index.css`
+- `src/styles/theme.css`
+- `src/styles/tailwind.css`
 
-Isso gera **motivação contínua e sensação de progresso**.
+## Como o plano de negocios e montado hoje
 
----
+- As respostas das 20 missoes ficam no estado em `App.tsx`.
+- Ao final, as respostas sao enviadas para `BusinessPlanScreen`.
+- A tela final organiza em 4 blocos de 5 respostas:
+  - Contexto do Negocio
+  - Cliente
+  - Problema
+  - Solucao e Viabilidade
 
-# 🧩 Estrutura da Plataforma
+## Edicao de respostas no final da trilha
 
-A jornada do usuário é dividida em 5 etapas.
+- Cada card de resposta na tela final possui acao `Editar`.
+- Ao clicar, o app abre a missao especifica em modo de edicao.
+- Ao salvar, retorna direto para o plano sem reiniciar a trilha.
 
-### 1️⃣ Entrada
-Apresentação da jornada e convite para iniciar a trilha.
+## Observacoes importantes
 
-### 2️⃣ Diagnóstico Inicial
-Mapeamento do perfil do empreendedor.
-
-### 3️⃣ Trilha Gamificada
-
-Módulos:
-
-- Estrutura do Negócio
-- Produto e Cliente
-- Preço e Custos
-- Divulgação e Vendas
-- Expansão
-
-Cada módulo possui:
-
-- microconteúdo educativo
-- perguntas de múltipla escolha
-- missões abertas
-- feedback da IA
-
----
-
-### 4️⃣ Geração do Plano de Negócios
-
-A IA organiza automaticamente as respostas em um documento estruturado contendo:
-
-- resumo executivo
-- identidade do negócio
-- análise de mercado
-- estratégia comercial
-- estrutura financeira
-- plano de crescimento
-
-O resultado final é disponibilizado em **PDF profissional**.
-
----
-
-### 5️⃣ Validação
-
-A plataforma coleta métricas como:
-
-- taxa de conclusão da trilha
-- tempo por módulo
-- engajamento dos usuários
-- avaliação do plano gerado
-
-Esses dados ajudam a melhorar continuamente a experiência.
-
+- O botao `Baixar PDF` ainda e placeholder (nao gera PDF real nesta versao).
+- O botao de `Compartilhar` tambem esta como placeholder.
