@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "deploy": "npx wrangler pages deploy dist --project-name educaimpacto",
     "dev": "vite"
   },
   "dependencies": {
