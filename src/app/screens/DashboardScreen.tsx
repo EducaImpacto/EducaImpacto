@@ -81,7 +81,7 @@ export function DashboardScreen({
                   variant="secondary"
                   size="lg"
                   onClick={() => onModuleClick(nextModule.id)}
-                  className="bg-white text-blue-600 hover:bg-blue-50"
+                  className="!bg-white !text-blue-600 hover:!bg-blue-50"
                 >
                   Continuar Trilha
                 </Button>
@@ -116,7 +116,7 @@ export function DashboardScreen({
                       variant="secondary"
                       size="lg"
                       onClick={onGeneratePlan}
-                      className="bg-white text-green-600 hover:bg-green-50"
+                      className="!bg-white !text-green-600 hover:!bg-green-50"
                     >
                       <FileDown className="w-5 h-5 mr-2 inline" />
                       Gerar Plano de Negócios
