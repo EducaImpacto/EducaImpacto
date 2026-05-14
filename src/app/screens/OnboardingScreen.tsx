@@ -7,9 +7,11 @@ type ProfileType = 'iniciante' | 'intermediario' | 'avancado';
 interface OnboardingScreenProps {
   profileType: ProfileType;
   onStart: () => void;
+  onOpenModules: () => void;
+  onBackToDiagnostic: () => void;
 }
 
-export function OnboardingScreen({ profileType, onStart }: OnboardingScreenProps) {
+export function OnboardingScreen({ profileType, onStart, onOpenModules, onBackToDiagnostic }: OnboardingScreenProps) {
   const isBeginner = profileType === 'iniciante';
 
   return (
@@ -87,6 +89,14 @@ export function OnboardingScreen({ profileType, onStart }: OnboardingScreenProps
             <Button variant="primary" size="lg" className="w-full" onClick={onStart}>
               Começar minha jornada
             </Button>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button variant="outline" size="md" className="w-full" onClick={onOpenModules}>
+                Ver módulos da trilha
+              </Button>
+              <Button variant="outline" size="md" className="w-full" onClick={onBackToDiagnostic}>
+                Voltar às perguntas
+              </Button>
+            </div>
             <p className="text-center text-sm text-gray-500">
               Ganhe XP, desbloqueie insígnias e construa seu plano enquanto avança
             </p>

@@ -5,9 +5,10 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 interface LandingPageProps {
   onStart: () => void;
+  onOpenModules: () => void;
 }
 
-export function LandingPage({ onStart }: LandingPageProps) {
+export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
       {/* Header */}
@@ -18,7 +19,10 @@ export function LandingPage({ onStart }: LandingPageProps) {
               <Sparkles className="w-8 h-8 text-blue-600" />
               <span className="text-2xl font-bold text-blue-600">Educa Impacto</span>
             </div>
-            <Button onClick={onStart} size="md">Começar Diagnóstico</Button>
+            <div className="hidden items-center gap-3 sm:flex">
+              <Button variant="outline" onClick={onOpenModules} size="md">Ver módulos</Button>
+              <Button onClick={onStart} size="md">Começar Diagnóstico</Button>
+            </div>
           </div>
         </div>
       </header>
@@ -45,9 +49,9 @@ export function LandingPage({ onStart }: LandingPageProps) {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={onOpenModules}
               >
-                Ver Como Funciona
+                Ir direto aos módulos
               </Button>
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-gray-600">
@@ -232,6 +236,15 @@ export function LandingPage({ onStart }: LandingPageProps) {
             Iniciar minha jornada empreendedora
             <ArrowRight className="w-5 h-5 ml-2 inline" />
           </Button>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={onOpenModules}
+              className="font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Ver módulos sem responder o diagnóstico agora
+            </button>
+          </div>
         </div>
       </section>
 

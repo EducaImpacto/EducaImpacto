@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ProgressBar } from '../components/ProgressBar';
-import { Sparkles, ArrowRight, Loader2, X } from 'lucide-react';
+import { Sparkles, ArrowRight, ArrowLeft, Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Mission {
@@ -21,7 +21,10 @@ interface MissionScreenProps {
   currentMissionNumber: number;
   initialAnswer?: string;
   isEditing?: boolean;
+  canGoBack?: boolean;
+  backLabel?: string;
   onNext: (answer: string) => void;
+  onBack: () => void;
 }
 
 export function MissionScreen({
@@ -31,7 +34,10 @@ export function MissionScreen({
   currentMissionNumber,
   initialAnswer = '',
   isEditing = false,
+  canGoBack = false,
+  backLabel = 'Voltar pergunta',
   onNext,
+  onBack,
 }: MissionScreenProps) {
   const [answer, setAnswer] = useState(initialAnswer);
   const [loadingIA, setLoadingIA] = useState(false);
@@ -175,6 +181,17 @@ export function MissionScreen({
         </AnimatePresence>
 
         <div className="space-y-3">
+          {canGoBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-2xl transition-all duration-150 text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {backLabel}
+            </button>
+          )}
+
           <button
             onClick={handleNext}
             disabled={!answer.trim()}

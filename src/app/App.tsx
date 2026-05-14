@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { LandingPage } from './screens/LandingPage';
 import { DiagnosticScreen } from './screens/DiagnosticScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { MissionScreen } from './screens/MissionScreen';
 import { ModuleCompletedScreen } from './screens/ModuleCompletedScreen';
 import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
+import { DashboardScreen } from './screens/DashboardScreen';
+import { AppFooter } from './components/AppFooter';
 import { DiagnosticData } from './screens/DiagnosticScreen';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -12,6 +14,7 @@ type Screen =
   | 'landing'
   | 'diagnostic'
   | 'onboarding'
+  | 'dashboard'
   | 'mission'
   | 'etapa-concluida'
   | 'business-plan';
@@ -33,6 +36,15 @@ interface Etapa {
   id: number;
   label: string;
   badge: string;
+  missions: Mission[];
+}
+
+export interface Module {
+  id: number;
+  title: string;
+  description: string;
+  completed: boolean;
+  locked: boolean;
   missions: Mission[];
 }
 
@@ -229,6 +241,37 @@ const ETAPAS: Etapa[] = [
 ];
 
 const TOTAL_MISSIONS = ETAPAS.reduce((acc, e) => acc + e.missions.length, 0); // 20
+const STORAGE_KEY = 'educa-impacto-progress-v1';
+
+const DEFAULT_DIAGNOSTIC_DATA: DiagnosticData = {
+  objetivo: 'primeiro-negocio',
+  experiencia: 'zero',
+  capacidadePlano: 'precisaria-ajuda',
+  usoFerramentas: 'nunca',
+  experienciaPlano: 'nunca-contato',
+  nivel: 'iniciante',
+};
+
+interface PersistedState {
+  screen: Screen;
+  diagnosticData: DiagnosticData | null;
+  etapaIndex: number;
+  missaoIndex: number;
+  respostas: Record<number, string>;
+  xp: number;
+  nivel: number;
+}
+
+function readPersistedState(): Partial<PersistedState> | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 function getPlanBlocksByEtapa(etapa: number): string[] {
   switch (etapa) {
@@ -247,19 +290,20 @@ function getPlanBlocksByEtapa(etapa: number): string[] {
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('landing');
-  const [diagnosticData, setDiagnosticData] = useState<DiagnosticData | null>(null);
+  const persistedState = useMemo(() => readPersistedState(), []);
+  const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
+  const [diagnosticData, setDiagnosticData] = useState<DiagnosticData | null>(persistedState?.diagnosticData ?? null);
   const [editingMissionId, setEditingMissionId] = useState<number | null>(null);
   const [editReturnScreen, setEditReturnScreen] = useState<EditReturnScreen>('business-plan');
 
   // Progresso na trilha
-  const [etapaIndex, setEtapaIndex] = useState(0);   // 0..3
-  const [missaoIndex, setMissaoIndex] = useState(0); // 0..4 dentro da etapa
-  const [respostas, setRespostas] = useState<Record<number, string>>({}); // missionId → resposta
+  const [etapaIndex, setEtapaIndex] = useState(persistedState?.etapaIndex ?? 0);   // 0..3
+  const [missaoIndex, setMissaoIndex] = useState(persistedState?.missaoIndex ?? 0); // 0..4 dentro da etapa
+  const [respostas, setRespostas] = useState<Record<number, string>>(persistedState?.respostas ?? {}); // missionId → resposta
 
   // Gamificação
-  const [xp, setXp] = useState(0);
-  const [nivel, setNivel] = useState(1);
+  const [xp, setXp] = useState(persistedState?.xp ?? 0);
+  const [nivel, setNivel] = useState(persistedState?.nivel ?? 1);
 
   useEffect(() => {
     if (etapaIndex < 0 || etapaIndex >= ETAPAS.length) {
@@ -274,6 +318,22 @@ export default function App() {
     }
   }, [etapaIndex, missaoIndex]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const state: PersistedState = {
+      screen,
+      diagnosticData,
+      etapaIndex,
+      missaoIndex,
+      respostas,
+      xp,
+      nivel,
+    };
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [diagnosticData, etapaIndex, missaoIndex, nivel, respostas, screen, xp]);
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   const etapaIndexSeguro = etapaIndex >= 0 && etapaIndex < ETAPAS.length ? etapaIndex : 0;
   const etapaAtual = ETAPAS[etapaIndexSeguro];
@@ -287,6 +347,7 @@ export default function App() {
     1;
 
   const progresso = Math.round((missaoGlobalAtual / TOTAL_MISSIONS) * 100);
+  const activeDiagnosticData = diagnosticData ?? DEFAULT_DIAGNOSTIC_DATA;
 
   const businessPlanAnswers = ETAPAS.flatMap((etapa) =>
     etapa.missions
@@ -308,16 +369,77 @@ export default function App() {
     }))
     .filter((mission) => Boolean(mission.answer));
 
+  const completedMissionCount = Object.values(respostas).filter(Boolean).length;
+  const overallProgress = Math.round((completedMissionCount / TOTAL_MISSIONS) * 100);
+  const modules: Module[] = ETAPAS.map((etapa) => {
+    const answeredMissions = etapa.missions.filter((mission) => Boolean(respostas[mission.id])).length;
+
+    return {
+      id: etapa.id,
+      title: etapa.label,
+      description: answeredMissions > 0
+        ? `${answeredMissions} de ${etapa.missions.length} respostas preenchidas`
+        : 'Comece quando quiser',
+      completed: answeredMissions === etapa.missions.length,
+      locked: false,
+      missions: etapa.missions,
+    };
+  });
+
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleDiagnosticComplete = (data: DiagnosticData) => {
     setDiagnosticData(data);
     setScreen('onboarding');
   };
 
+  const handleOpenModules = () => {
+    setDiagnosticData((current) => current ?? DEFAULT_DIAGNOSTIC_DATA);
+    setEditingMissionId(null);
+    setScreen('dashboard');
+  };
+
   const handleStartTrail = () => {
     setEtapaIndex(0);
     setMissaoIndex(0);
+    setEditingMissionId(null);
     setScreen('mission');
+  };
+
+  const handleModuleClick = (moduleId: number) => {
+    const moduleIndex = ETAPAS.findIndex((etapa) => etapa.id === moduleId);
+    if (moduleIndex === -1) return;
+
+    const firstUnansweredMissionIndex = ETAPAS[moduleIndex].missions.findIndex(
+      (mission) => !respostas[mission.id]
+    );
+
+    setDiagnosticData((current) => current ?? DEFAULT_DIAGNOSTIC_DATA);
+    setEtapaIndex(moduleIndex);
+    setMissaoIndex(firstUnansweredMissionIndex === -1 ? 0 : firstUnansweredMissionIndex);
+    setEditingMissionId(null);
+    setScreen('mission');
+  };
+
+  const handlePreviousMission = () => {
+    if (editingMissionId !== null) {
+      setEditingMissionId(null);
+      setScreen(editReturnScreen);
+      return;
+    }
+
+    if (missaoIndex > 0) {
+      setMissaoIndex((i) => i - 1);
+      return;
+    }
+
+    if (etapaIndex > 0) {
+      const previousEtapaIndex = etapaIndex - 1;
+      setEtapaIndex(previousEtapaIndex);
+      setMissaoIndex(ETAPAS[previousEtapaIndex].missions.length - 1);
+      return;
+    }
+
+    setScreen('dashboard');
   };
 
   const handleNextMission = (answer: string) => {
@@ -389,17 +511,34 @@ export default function App() {
   return (
     <div className="min-h-screen">
       {screen === 'landing' && (
-        <LandingPage onStart={() => setScreen('diagnostic')} />
+        <LandingPage onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />
       )}
 
       {screen === 'diagnostic' && (
         <DiagnosticScreen onComplete={handleDiagnosticComplete} />
       )}
 
-      {screen === 'onboarding' && diagnosticData && (
+      {screen === 'onboarding' && (
         <OnboardingScreen
-          profileType={diagnosticData.nivel}
+          profileType={activeDiagnosticData.nivel}
           onStart={handleStartTrail}
+          onOpenModules={handleOpenModules}
+          onBackToDiagnostic={() => setScreen('diagnostic')}
+        />
+      )}
+
+      {screen === 'dashboard' && (
+        <DashboardScreen
+          level={nivel}
+          xp={xp}
+          nextLevelXp={nivel * 300}
+          overallProgress={overallProgress}
+          modules={modules}
+          totalMissions={TOTAL_MISSIONS}
+          completedMissions={completedMissionCount}
+          canGeneratePlan={completedMissionCount > 0}
+          onModuleClick={handleModuleClick}
+          onGeneratePlan={() => setScreen('business-plan')}
         />
       )}
 
@@ -411,7 +550,10 @@ export default function App() {
           currentMissionNumber={missaoGlobalAtual}
           initialAnswer={respostas[missaoAtual.id] ?? ''}
           isEditing={editingMissionId !== null}
+          canGoBack
+          backLabel={missaoGlobalAtual > 1 || editingMissionId !== null ? 'Voltar pergunta' : 'Voltar aos módulos'}
           onNext={handleNextMission}
+          onBack={handlePreviousMission}
         />
       )}
 
@@ -432,16 +574,18 @@ export default function App() {
         />
       )}
 
-      {screen === 'business-plan' && diagnosticData && (
+      {screen === 'business-plan' && (
         <BusinessPlanScreen
-          diagnosticData={diagnosticData}
+          diagnosticData={activeDiagnosticData}
           answers={businessPlanAnswers}
           onDownload={handleDownloadPlan}
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
           onShare={() => alert('Compartilhamento disponível em breve!')}
-          onBackToDashboard={() => setScreen('landing')}
+          onBackToDashboard={handleOpenModules}
         />
       )}
+
+      {screen !== 'landing' && <AppFooter />}
     </div>
   );
 }

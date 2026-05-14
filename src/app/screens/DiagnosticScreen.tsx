@@ -147,11 +147,17 @@ export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
   };
 
   const handleProximo = () => {
+    const respostasAtualizadas = {
+      ...respostas,
+      [perguntaAtual.id]: respostaAtual,
+    };
+
     if (step < totalPerguntas - 1) {
       setStep(step + 1);
     } else {
       // Última pergunta — classificar
-      const nivelCalculado = classificarNivel(respostas);
+      const nivelCalculado = classificarNivel(respostasAtualizadas);
+      setRespostas(respostasAtualizadas);
       setNivel(nivelCalculado);
       setStep(totalPerguntas); // tela de resultado
     }
