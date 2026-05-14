@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "domain:add": "node scripts/add-cloudflare-pages-domain.mjs",
+    "domain:point": "node scripts/point-cloudflare-dns-to-pages.mjs",
+    "domain:status": "node scripts/cloudflare-domain-status.mjs",
     "deploy": "npx wrangler pages deploy dist --project-name educaimpacto",
     "dev": "vite"
   },
