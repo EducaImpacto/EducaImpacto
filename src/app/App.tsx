@@ -346,7 +346,7 @@ export default function App() {
     missaoIndexSeguro +
     1;
 
-  const progresso = Math.round((missaoGlobalAtual / TOTAL_MISSIONS) * 100);
+  const progresso = Math.round(((missaoIndexSeguro + 1) / etapaAtual.missions.length) * 100);
   const activeDiagnosticData = diagnosticData ?? DEFAULT_DIAGNOSTIC_DATA;
 
   const businessPlanAnswers = ETAPAS.flatMap((etapa) =>
@@ -476,7 +476,7 @@ export default function App() {
     } else {
       setEtapaIndex((i) => i + 1);
       setMissaoIndex(0);
-      setScreen('mission');
+      setScreen('dashboard');
     }
   };
 
@@ -548,6 +548,10 @@ export default function App() {
           progress={progresso}
           totalMissions={TOTAL_MISSIONS}
           currentMissionNumber={missaoGlobalAtual}
+          totalModules={ETAPAS.length}
+          currentModuleNumber={etapaIndexSeguro + 1}
+          totalModuleMissions={etapaAtual.missions.length}
+          currentModuleMissionNumber={missaoIndexSeguro + 1}
           initialAnswer={respostas[missaoAtual.id] ?? ''}
           isEditing={editingMissionId !== null}
           canGoBack

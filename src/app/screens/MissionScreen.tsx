@@ -19,6 +19,10 @@ interface MissionScreenProps {
   progress: number;
   totalMissions: number;
   currentMissionNumber: number;
+  totalModules: number;
+  currentModuleNumber: number;
+  totalModuleMissions: number;
+  currentModuleMissionNumber: number;
   initialAnswer?: string;
   isEditing?: boolean;
   canGoBack?: boolean;
@@ -30,8 +34,10 @@ interface MissionScreenProps {
 export function MissionScreen({
   mission,
   progress,
-  totalMissions,
-  currentMissionNumber,
+  totalModules,
+  currentModuleNumber,
+  totalModuleMissions,
+  currentModuleMissionNumber,
   initialAnswer = '',
   isEditing = false,
   canGoBack = false,
@@ -102,7 +108,10 @@ export function MissionScreen({
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center gap-3 mb-1">
             <span className="text-xs font-semibold text-gray-500">
-              Missão {currentMissionNumber} de {totalMissions}
+              Módulo {currentModuleNumber} de {totalModules}
+            </span>
+            <span className="text-xs font-semibold text-gray-500">
+              Pergunta {currentModuleMissionNumber} de {totalModuleMissions}
             </span>
             <span className="ml-auto text-xs font-bold text-blue-600">{progress}%</span>
           </div>
