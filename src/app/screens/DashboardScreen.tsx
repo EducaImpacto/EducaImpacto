@@ -17,6 +17,7 @@ interface DashboardScreenProps {
   canGeneratePlan: boolean;
   onModuleClick: (moduleId: number) => void;
   onGeneratePlan: () => void;
+  onHome: () => void;
 }
 
 export function DashboardScreen({
@@ -30,6 +31,7 @@ export function DashboardScreen({
   canGeneratePlan,
   onModuleClick,
   onGeneratePlan,
+  onHome,
 }: DashboardScreenProps) {
   const completedModules = modules.filter((module) => module.completed).length;
   const nextModule = modules.find((module) => !module.completed && !module.locked);
@@ -46,6 +48,9 @@ export function DashboardScreen({
                 <p className="text-sm text-gray-600">Acompanhe seu progresso na construção do plano de negócios</p>
               </div>
             </div>
+            <Button variant="outline" size="sm" onClick={onHome}>
+              Início
+            </Button>
           </div>
         </div>
       </header>

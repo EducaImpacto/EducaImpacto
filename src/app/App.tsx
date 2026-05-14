@@ -539,6 +539,7 @@ export default function App() {
           canGeneratePlan={completedMissionCount > 0}
           onModuleClick={handleModuleClick}
           onGeneratePlan={() => setScreen('business-plan')}
+          onHome={() => setScreen('landing')}
         />
       )}
 
