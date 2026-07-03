@@ -57,14 +57,6 @@ const ETAPAS: Etapa[] = [
     missions: [
       {
         id: 1, etapa: 1, etapaLabel: 'Contexto do Negócio',
-        title: 'Motivação',
-        intro: 'Todo negócio começa por um motivo. Antes de pensar em como fazer, vamos entender o que te trouxe até aqui.',
-        question: 'O que te motivou a criar esse negócio?',
-        placeholder: 'Ex: Sempre quis ter independência financeira. Percebi que muita gente na minha cidade precisava de...',
-        xpReward: 50,
-      },
-      {
-        id: 2, etapa: 1, etapaLabel: 'Contexto do Negócio',
         title: 'Sua ideia',
         intro: 'Vamos entender melhor o que você quer construir.',
         question: 'Qual é a sua ideia de negócio? O que você pretende vender ou oferecer?',
@@ -72,7 +64,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 50,
       },
       {
-        id: 3, etapa: 1, etapaLabel: 'Contexto do Negócio',
+        id: 2, etapa: 1, etapaLabel: 'Contexto do Negócio',
         title: 'Sua experiência',
         intro: 'Você não precisa saber tudo para começar, mas toda experiência ajuda.',
         question: 'Você já teve alguma experiência com esse tipo de negócio? Conte como foi.',
@@ -80,7 +72,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 50,
       },
       {
-        id: 4, etapa: 1, etapaLabel: 'Contexto do Negócio',
+        id: 3, etapa: 1, etapaLabel: 'Contexto do Negócio',
         title: 'O começo',
         intro: 'Todo negócio começa com ações simples. Pensar no primeiro passo ajuda a tirar a ideia do papel.',
         question: 'Qual é a primeira coisa que você pretende fazer para começar esse negócio?',
@@ -88,7 +80,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 50,
       },
       {
-        id: 5, etapa: 1, etapaLabel: 'Contexto do Negócio',
+        id: 4, etapa: 1, etapaLabel: 'Contexto do Negócio',
         title: 'O que você já tem',
         intro: 'Você não precisa começar do zero. Você pode já ter algo que ajude no começo.',
         question: 'O que você já tem hoje que pode te ajudar a começar esse negócio?\n(Conhecimentos, ferramentas, contatos, espaço, dinheiro, ...)',
@@ -103,7 +95,7 @@ const ETAPAS: Etapa[] = [
     badge: 'Cliente Mapeado',
     missions: [
       {
-        id: 6, etapa: 2, etapaLabel: 'Cliente',
+        id: 5, etapa: 2, etapaLabel: 'Cliente',
         title: 'Seu cliente',
         intro: 'Todo negócio existe para solucionar o problema de alguém. Vamos começar entendendo quem é essa pessoa.',
         question: 'Quem você quer atender com seu negócio? Descreva da forma mais clara possível.',
@@ -111,7 +103,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 60,
       },
       {
-        id: 7, etapa: 2, etapaLabel: 'Cliente',
+        id: 6, etapa: 2, etapaLabel: 'Cliente',
         title: 'Perfil do cliente',
         intro: 'Vamos entender melhor como é essa pessoa no dia a dia.',
         question: 'Como é o seu cliente?\n(Idade, rotina, interesses, profissão, ...)',
@@ -119,7 +111,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 60,
       },
       {
-        id: 8, etapa: 2, etapaLabel: 'Cliente',
+        id: 7, etapa: 2, etapaLabel: 'Cliente',
         title: 'Realidade do cliente',
         intro: 'Antes de conhecer sua solução, seu cliente já tenta lidar com essa situação de alguma forma.',
         question: 'O que seu cliente faz atualmente para resolver esse problema?',
@@ -127,7 +119,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 60,
       },
       {
-        id: 9, etapa: 2, etapaLabel: 'Cliente',
+        id: 8, etapa: 2, etapaLabel: 'Cliente',
         title: 'Onde encontrar seu cliente',
         intro: 'Para o negócio crescer, você precisa saber onde encontrar esse cliente.',
         question: 'Onde você consegue encontrar esse tipo de cliente?\n(Redes sociais, lojas, grupos, bairros, comunidades, ...)',
@@ -135,7 +127,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 60,
       },
       {
-        id: 10, etapa: 2, etapaLabel: 'Cliente',
+        id: 9, etapa: 2, etapaLabel: 'Cliente',
         title: 'Como seu cliente gasta dinheiro',
         intro: 'Para que um negócio funcione, o cliente precisa estar disposto e conseguir pagar pela solução.',
         question: 'Seu cliente costuma gastar dinheiro para resolver esse problema? Com o que ele gasta atualmente?',
@@ -150,7 +142,7 @@ const ETAPAS: Etapa[] = [
     badge: 'Problema Identificado',
     missions: [
       {
-        id: 11, etapa: 3, etapaLabel: 'Problema',
+        id: 10, etapa: 3, etapaLabel: 'Problema',
         title: 'Problema principal',
         intro: 'Todo negócio resolve problemas. Vamos deixar claro qual é o principal deles.',
         question: 'Qual é o principal problema que seu cliente enfrenta?',
@@ -158,7 +150,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 70,
       },
       {
-        id: 12, etapa: 3, etapaLabel: 'Problema',
+        id: 11, etapa: 3, etapaLabel: 'Problema',
         title: 'Ocorrência e Frequência',
         intro: 'Entender quando e com que frequência o problema acontece ajuda a enxergar o tamanho dele.',
         question: 'Em quais situações esse problema costuma acontecer? Isso acontece com que frequência?',
@@ -166,7 +158,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 70,
       },
       {
-        id: 13, etapa: 3, etapaLabel: 'Problema',
+        id: 12, etapa: 3, etapaLabel: 'Problema',
         title: 'Impacto',
         intro: 'Resolver problemas importantes gera mais valor para o negócio.',
         question: 'Como esse problema afeta a vida do seu cliente?',
@@ -174,7 +166,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 70,
       },
       {
-        id: 14, etapa: 3, etapaLabel: 'Problema',
+        id: 13, etapa: 3, etapaLabel: 'Problema',
         title: 'Por que isso acontece',
         intro: 'Entender a causa do problema ajuda a encontrar soluções melhores.',
         question: 'Por que esse problema acontece?',
@@ -182,7 +174,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 70,
       },
       {
-        id: 15, etapa: 3, etapaLabel: 'Problema',
+        id: 14, etapa: 3, etapaLabel: 'Problema',
         title: 'O que não funciona hoje',
         intro: 'Se o problema continua existindo, é porque as soluções atuais não resolvem bem.',
         question: 'O que seu cliente já tentou fazer para resolver esse problema, mas não deu certo?',
@@ -197,7 +189,7 @@ const ETAPAS: Etapa[] = [
     badge: 'Plano Viável',
     missions: [
       {
-        id: 16, etapa: 4, etapaLabel: 'Solução e Viabilidade',
+        id: 15, etapa: 4, etapaLabel: 'Solução e Viabilidade',
         title: 'Sua solução',
         intro: 'Agora que o problema está claro, vamos pensar na solução.',
         question: 'O que você pretende oferecer para resolver esse problema?',
@@ -205,7 +197,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 80,
       },
       {
-        id: 17, etapa: 4, etapaLabel: 'Solução e Viabilidade',
+        id: 16, etapa: 4, etapaLabel: 'Solução e Viabilidade',
         title: 'Como sua solução ajuda o cliente',
         intro: 'Uma boa solução precisa resolver o problema de forma clara e funcionar no dia a dia do cliente.',
         question: 'Como sua solução resolve o problema do cliente? Como ele usaria isso no dia a dia?',
@@ -213,7 +205,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 80,
       },
       {
-        id: 18, etapa: 4, etapaLabel: 'Solução e Viabilidade',
+        id: 17, etapa: 4, etapaLabel: 'Solução e Viabilidade',
         title: 'Como você ganha dinheiro',
         intro: 'Todo negócio precisa gerar dinheiro para funcionar.',
         question: 'Como você pretende ganhar dinheiro com isso?\n(Como o cliente paga? Por produto, serviço, mensalidade, etc.)',
@@ -221,7 +213,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 80,
       },
       {
-        id: 19, etapa: 4, etapaLabel: 'Solução e Viabilidade',
+        id: 18, etapa: 4, etapaLabel: 'Solução e Viabilidade',
         title: 'Funcionamento',
         intro: 'Além da ideia, é importante entender como o negócio acontece na prática.',
         question: 'Como seu negócio vai funcionar no dia a dia?\n(O que você faz, como entrega, como atende o cliente, ...)',
@@ -229,7 +221,7 @@ const ETAPAS: Etapa[] = [
         xpReward: 80,
       },
       {
-        id: 20, etapa: 4, etapaLabel: 'Solução e Viabilidade',
+        id: 19, etapa: 4, etapaLabel: 'Solução e Viabilidade',
         title: 'O que você precisa para começar',
         intro: 'Todo negócio precisa de alguns recursos para sair do papel.',
         question: 'O que você precisa para começar esse negócio? Descreva o que é necessário e quais seriam os custos.\n(Materiais, equipamentos, dinheiro, ajuda de alguém, ...)',
@@ -292,7 +284,12 @@ function getPlanBlocksByEtapa(etapa: number): string[] {
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
   const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
-  const [history, setHistory] = useState<Screen[]>([persistedState?.screen ?? "landing"]);
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'auto',
+    });
+  }, [screen]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticData | null>(persistedState?.diagnosticData ?? null);
   const [editingMissionId, setEditingMissionId] = useState<number | null>(null);
   const [editReturnScreen, setEditReturnScreen] = useState<EditReturnScreen>('business-plan');
@@ -422,24 +419,20 @@ export default function App() {
   };
 
   const handlePreviousMission = () => {
+    // Voltando durante edição
     if (editingMissionId !== null) {
       setEditingMissionId(null);
       setScreen(editReturnScreen);
       return;
     }
 
+    // Ainda existem perguntas anteriores neste módulo
     if (missaoIndex > 0) {
       setMissaoIndex((i) => i - 1);
       return;
     }
 
-    if (etapaIndex > 0) {
-      const previousEtapaIndex = etapaIndex - 1;
-      setEtapaIndex(previousEtapaIndex);
-      setMissaoIndex(ETAPAS[previousEtapaIndex].missions.length - 1);
-      return;
-    }
-
+    // Primeira pergunta do módulo → volta para o Dashboard
     setScreen('dashboard');
   };
 
@@ -472,13 +465,13 @@ export default function App() {
 
   const handleNextEtapa = () => {
     const ultimaEtapa = etapaIndex === ETAPAS.length - 1;
-    if (ultimaEtapa) {
-      setScreen('business-plan');
-    } else {
+
+    if (!ultimaEtapa) {
       setEtapaIndex((i) => i + 1);
       setMissaoIndex(0);
-      setScreen('dashboard');
     }
+
+    setScreen('dashboard');
   };
 
   const handleDownloadPlan = () => {
@@ -543,7 +536,7 @@ export default function App() {
           modules={modules}
           totalMissions={TOTAL_MISSIONS}
           completedMissions={completedMissionCount}
-          canGeneratePlan={completedMissionCount > 0}
+          canGeneratePlan={completedMissionCount === TOTAL_MISSIONS}
           onModuleClick={handleModuleClick}
           onGeneratePlan={() => setScreen('business-plan')}
           onHome={() => setScreen('landing')}
@@ -563,7 +556,11 @@ export default function App() {
           initialAnswer={respostas[missaoAtual.id] ?? ''}
           isEditing={editingMissionId !== null}
           canGoBack
-          backLabel={missaoGlobalAtual > 1 || editingMissionId !== null ? 'Voltar pergunta' : 'Voltar aos módulos'}
+          backLabel={
+            missaoIndex > 0 || editingMissionId !== null
+              ? 'Voltar pergunta'
+              : 'Voltar aos módulos'
+          }
           onNext={handleNextMission}
           onBack={handlePreviousMission}
         />
@@ -583,6 +580,15 @@ export default function App() {
           answers={currentModuleAnswers}
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'etapa-concluida')}
           onNext={handleNextEtapa}
+          onNextModule={
+            etapaIndex < ETAPAS.length - 1
+              ? () => {
+                  setEtapaIndex((i) => i + 1);
+                  setMissaoIndex(0);
+                  setScreen('mission');
+                }
+              : undefined
+          }
         />
       )}
 

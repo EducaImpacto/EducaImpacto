@@ -18,6 +18,7 @@ interface ModuleCompletedScreenProps {
   answers: MissionAnswer[];
   onEditAnswer: (missionId: string) => void;
   onNext: () => void;
+  onNextModule?: () => void;
 }
 
 export function ModuleCompletedScreen({ 
@@ -27,7 +28,8 @@ export function ModuleCompletedScreen({
   isLastModule = false,
   answers,
   onEditAnswer,
-  onNext 
+  onNext,
+  onNextModule
 }: ModuleCompletedScreenProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -114,29 +116,33 @@ export function ModuleCompletedScreen({
             </div>
           </motion.div>
 
-          {/* Nova Insígnia */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mb-8"
-          >
-            <p className="text-sm font-medium text-gray-600 mb-3">Nova Insígnia Desbloqueada</p>
-            <div className="flex justify-center">
-              <Badge type="trophy" label={badgeLabel} color="green" />
-            </div>
-          </motion.div>
-
           {/* Botão para Próximo Módulo */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
+            className="flex flex-col sm:flex-row gap-4"
           >
-            <Button variant="primary" size="lg" className="w-full" onClick={onNext}>
-              {isLastModule ? 'Ver Plano de Negócios' : 'Voltar aos módulos'}
-              <ArrowRight className="w-5 h-5 ml-2 inline" />
+            <Button
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              onClick={onNext}
+            >
+              Voltar ao Dashboard
             </Button>
+
+            {!isLastModule && onNextModule && (
+              <Button
+                variant="primary"
+                size="lg"
+                className="flex-1"
+                onClick={onNextModule}
+              >
+                Próximo módulo
+                <ArrowRight className="w-5 h-5 ml-2 inline" />
+              </Button>
+            )}
           </motion.div>
 
           {/* Mensagem Motivacional */}

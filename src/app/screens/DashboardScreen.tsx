@@ -62,7 +62,6 @@ export function DashboardScreen({
               <div className="flex items-center justify-between gap-4 mb-4">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Progresso Geral</h2>
-                  <p className="text-sm text-gray-600">Uma missão concluída por vez, sem sobrecarga.</p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">{overallProgress}%</div>
@@ -109,27 +108,49 @@ export function DashboardScreen({
               </div>
             </div>
 
-            {canGeneratePlan && (
-              <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-lg p-8 text-white">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-2">Plano de Negócios desbloqueado</h2>
-                    <p className="text-green-100 mb-6">
-                      Você completou as 20 missões. Agora a IA organiza suas respostas em um plano estruturado.
-                    </p>
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      onClick={onGeneratePlan}
-                      className="!bg-white !text-green-600 hover:!bg-green-50"
-                    >
-                      <FileDown className="w-5 h-5 mr-2 inline" />
-                      Gerar Plano de Negócios
-                    </Button>
-                  </div>
+            <div
+              className={`rounded-2xl shadow-lg p-8 text-white ${
+                canGeneratePlan
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                  : 'bg-gradient-to-r from-amber-500 to-orange-500'
+              }`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  {canGeneratePlan ? (
+                    <>
+                      <h2 className="text-2xl font-bold mb-2">
+                        Plano de Negócios desbloqueado
+                      </h2>
+
+                      <p className="text-green-100 mb-6">
+                        Você completou todas as missões! A IA vai organizar suas respostas em um plano estruturado.
+                      </p>
+
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        onClick={onGeneratePlan}
+                        className="!bg-white !text-green-600 hover:!bg-green-50"
+                      >
+                        <FileDown className="w-5 h-5 mr-2 inline" />
+                        Gerar Plano de Negócios
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-2xl font-bold mb-2">
+                        Plano de Negócios bloqueado
+                      </h2>
+
+                      <p className="text-orange-100">
+                        Responda todas as missões da trilha para desbloquear a geração automática do Plano de Negócios. Você já concluiu <strong>{completedMissions}</strong> de <strong>{totalMissions}</strong> missões.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           <div className="space-y-6">
