@@ -6,12 +6,12 @@ type ProfileType = 'iniciante' | 'intermediario' | 'avancado';
 
 interface OnboardingScreenProps {
   profileType: ProfileType;
-  onStart: () => void;
   onOpenModules: () => void;
   onBackToDiagnostic: () => void;
+  onBackToLanding: () => void;
 }
 
-export function OnboardingScreen({ profileType, onStart, onOpenModules, onBackToDiagnostic }: OnboardingScreenProps) {
+export function OnboardingScreen({ profileType, onBackToLanding, onOpenModules, onBackToDiagnostic }: OnboardingScreenProps) {
   const isBeginner = profileType === 'iniciante';
 
   return (
@@ -86,15 +86,15 @@ export function OnboardingScreen({ profileType, onStart, onOpenModules, onBackTo
           </div>
 
           <div className="space-y-4">
-            <Button variant="primary" size="lg" className="w-full" onClick={onStart}>
+            <Button variant="primary" size="lg" className="w-full" onClick={onOpenModules}>
               Começar minha jornada
             </Button>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Button variant="outline" size="md" className="w-full" onClick={onOpenModules}>
-                Ver módulos da trilha
+              <Button variant="outline" size="md" className="w-full" onClick={onBackToLanding}>
+                Voltar ao início
               </Button>
               <Button variant="outline" size="md" className="w-full" onClick={onBackToDiagnostic}>
-                Voltar às perguntas
+                Revisar diagnóstico inicial
               </Button>
             </div>
             <p className="text-center text-sm text-gray-500">

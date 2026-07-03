@@ -28,13 +28,9 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-88px)] flex items-center">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-5">
-              <Rocket className="w-4 h-4" />
-              <span className="text-sm font-semibold">Demonstração MVP da trilha iniciante</span>
-            </div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               Do Sonho ao <span className="text-blue-600">Negócio</span>
             </h1>
@@ -72,8 +68,8 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-green-400 rounded-2xl transform rotate-3 opacity-20"></div>
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1765648763939-5cf190529964?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbnRyZXByZW5ldXIlMjB3b21hbiUyMHN0YXJ0dXAlMjBidXNpbmVzcyUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzcyNjY1NDQyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-              alt="Empreendedor usando tecnologia"
+              src="/empreendedor.jpg"
+              alt="Empreendedor usando tecnologia [1200x1000]"
               className="rounded-2xl shadow-2xl relative z-10 w-full"
             />
           </div>

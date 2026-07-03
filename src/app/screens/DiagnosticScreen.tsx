@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, ChevronRight, ChevronLeft, CheckCircle2, Trophy, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
+import { ArrowLeft } from "lucide-react";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 export type TrailLevel = 'iniciante' | 'intermediario' | 'avancado';
@@ -16,6 +17,7 @@ export interface DiagnosticData {
 
 interface DiagnosticScreenProps {
   onComplete: (data: DiagnosticData) => void;
+  onBack: () => void;
 }
 
 // ─── Dados das perguntas (fiel ao documento) ─────────────────────────────────
@@ -131,7 +133,10 @@ const RESULTADO_NIVEL = {
 };
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
+export function DiagnosticScreen({
+  onComplete,
+  onBack,
+}: DiagnosticScreenProps) {
   const [step, setStep] = useState(0); // 0..4 = perguntas, 5 = resultado
   const [respostas, setRespostas] = useState<Record<string, string>>({});
   const [nivel, setNivel] = useState<TrailLevel | null>(null);
@@ -163,9 +168,13 @@ export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
     }
   };
 
-  const handleVoltar = () => {
-    if (step > 0) setStep(step - 1);
-  };
+const handleVoltar = () => {
+  if (step === 0) {
+    onBack();
+  } else {
+    setStep(step - 1);
+  }
+};
 
   const handleContinuar = () => {
     if (!nivel) return;
@@ -250,6 +259,15 @@ export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
               </div>
 
               <button
+                type="button"
+                onClick={handleVoltar}
+                className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-2xl transition-all duration-150 text-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {step === 0 ? "Voltar à página inicial" : "Voltar pergunta"}
+              </button>
+
+              <button
                 onClick={handleContinuar}
                 className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-base"
               >
@@ -279,9 +297,7 @@ export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
             Primeiros passos
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-1">Começando sua jornada</h1>
-          <p className="text-gray-500 text-sm">
-            {step < 2 ? 'Bloco 1 de 2 — Sobre você' : 'Bloco 2 de 2 — Sobre conhecimento'}
-          </p>
+         
         </motion.div>
 
         {/* Barra de progresso */}
@@ -297,15 +313,6 @@ export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
               animate={{ width: `${progresso}%` }}
               transition={{ duration: 0.3 }}
             />
-          </div>
-          {/* Indicadores de bloco */}
-          <div className="flex justify-between mt-2">
-            <span className={`text-xs font-medium ${step < 2 ? 'text-blue-600' : 'text-gray-400'}`}>
-              Perfil
-            </span>
-            <span className={`text-xs font-medium ${step >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>
-              Maturidade
-            </span>
           </div>
         </div>
 
@@ -351,22 +358,22 @@ export function DiagnosticScreen({ onComplete }: DiagnosticScreenProps) {
         </motion.div>
 
         {/* Botões de navegação */}
-        <div className="flex gap-3">
-          {step > 0 && (
-            <button
-              onClick={handleVoltar}
-              className="flex items-center gap-2 border-2 border-gray-200 hover:border-gray-300 text-gray-600 font-semibold px-6 py-3.5 rounded-2xl transition-all duration-150 hover:bg-gray-50"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              Voltar
-            </button>
-          )}
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={handleVoltar}
+            className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-2xl transition-all duration-150 text-sm"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            {step === 0 ? "Voltar à página inicial" : "Voltar pergunta"}
+          </button>
+
           <button
             onClick={handleProximo}
             disabled={!respostaAtual}
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-2xl transition-all duration-150 shadow hover:shadow-md text-base"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all duration-150 shadow hover:shadow-md text-base"
           >
-            {step === totalPerguntas - 1 ? 'Ver meu resultado' : 'Próxima'}
+            {step === totalPerguntas - 1 ? "Ver meu resultado" : "Próxima"}
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

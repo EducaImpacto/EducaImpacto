@@ -292,6 +292,7 @@ function getPlanBlocksByEtapa(etapa: number): string[] {
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
   const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
+  const [history, setHistory] = useState<Screen[]>([persistedState?.screen ?? "landing"]);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticData | null>(persistedState?.diagnosticData ?? null);
   const [editingMissionId, setEditingMissionId] = useState<number | null>(null);
   const [editReturnScreen, setEditReturnScreen] = useState<EditReturnScreen>('business-plan');
@@ -515,13 +516,19 @@ export default function App() {
       )}
 
       {screen === 'diagnostic' && (
-        <DiagnosticScreen onComplete={handleDiagnosticComplete} />
+        <DiagnosticScreen
+          onComplete={handleDiagnosticComplete}
+          onBack={() => setScreen("landing")}
+        />
       )}
 
       {screen === 'onboarding' && (
         <OnboardingScreen
           profileType={activeDiagnosticData.nivel}
-          onStart={handleStartTrail}
+          onBackToLanding={() => {
+            setScreen("landing");
+            window.scrollTo(0, 0);
+          }}
           onOpenModules={handleOpenModules}
           onBackToDiagnostic={() => setScreen('diagnostic')}
         />
