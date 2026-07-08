@@ -15,8 +15,8 @@ export function ModuleCard({ title, description, completed, locked, onClick }: M
       onClick={!locked ? onClick : undefined}
       className={`
         p-6 rounded-xl border-2 transition-all duration-200
-        ${completed ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white'}
-        ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:border-blue-500'}
+        ${completed ? 'border-[#329314] bg-[#f5faf7]' : 'border-gray-200 bg-white'}
+        ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:border-[#052254]'}
       `}
     >
       <div className="flex items-start justify-between">
@@ -26,7 +26,7 @@ export function ModuleCard({ title, description, completed, locked, onClick }: M
         </div>
         <div className="ml-4">
           {completed ? (
-            <CheckCircle2 className="w-6 h-6 text-green-500" />
+            <CheckCircle2 className="w-6 h-6 text-[#329314]" />
           ) : locked ? (
             <Lock className="w-6 h-6 text-gray-400" />
           ) : (

@@ -8,11 +8,11 @@ interface MicroContentCardProps {
 
 export function MicroContentCard({ title, content }: MicroContentCardProps) {
   return (
-    <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-5 mb-6">
+    <div className="bg-[#f5faf7] border-l-4 border-[#052254] rounded-lg p-5 mb-6">
       <div className="flex items-start gap-3">
-        <BookOpen className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+        <BookOpen className="w-5 h-5 text-[#052254] mt-0.5 flex-shrink-0" />
         <div>
-          <h4 className="font-semibold text-blue-900 mb-2">{title}</h4>
+          <h4 className="font-semibold text-[#06173C] mb-2">{title}</h4>
           <p className="text-gray-700 text-sm leading-relaxed">{content}</p>
         </div>
       </div>

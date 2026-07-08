@@ -110,7 +110,7 @@ const RESULTADO_NIVEL = {
     emoji: '🚀',
     titulo: 'Você está começando sua jornada empreendedora!',
     desc: 'Vamos te guiar passo a passo para construir seu negócio.',
-    cor: 'from-blue-500 to-blue-600',
+    cor: 'from-[#052254] to-[#0A5740]',
     badge: 'Trilha Iniciante',
     xp: 50,
   },
@@ -118,7 +118,7 @@ const RESULTADO_NIVEL = {
     emoji: '⚡',
     titulo: 'Você já tem alguma base sobre negócios!',
     desc: 'Vamos aprofundar o que você já sabe e estruturar seu plano.',
-    cor: 'from-orange-500 to-orange-600',
+    cor: 'from-[#329314] to-[#0A5740]',
     badge: 'Trilha Intermediária',
     xp: 75,
   },
@@ -126,7 +126,7 @@ const RESULTADO_NIVEL = {
     emoji: '🏆',
     titulo: 'Você já tem experiência com negócios!',
     desc: 'Vamos direto ao desenvolvimento do plano de negócios.',
-    cor: 'from-green-500 to-green-600',
+    cor: 'from-[#329314] to-[#0A5740]',
     badge: 'Trilha Avançada',
     xp: 100,
   },
@@ -192,7 +192,7 @@ const handleVoltar = () => {
   if (step === totalPerguntas && nivel) {
     const resultado = RESULTADO_NIVEL[nivel];
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-white to-[#f5faf7] flex items-center justify-center p-4">
         <div className="max-w-lg w-full">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -224,37 +224,37 @@ const handleVoltar = () => {
                 Recompensas desbloqueadas
               </p>
               <div className="space-y-3 mb-8">
-                <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <Trophy className="w-5 h-5 text-orange-600" />
+                <div className="flex items-center gap-3 p-4 bg-[#f5faf7] border border-[#dbe9e2] rounded-xl">
+                  <div className="w-10 h-10 bg-[#e5f0ea] rounded-lg flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-[#329314]" />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900 text-sm">Insígnia desbloqueada</div>
-                    <div className="text-xs text-orange-700">Jornada Iniciada</div>
+                    <div className="text-xs text-[#0A5740]">Jornada Iniciada</div>
                   </div>
-                  <div className="ml-auto text-orange-500">✓</div>
+                  <div className="ml-auto text-[#329314]">✓</div>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-3 p-4 bg-[#f5faf7] border border-[#dbe9e2] rounded-xl">
+                  <div className="w-10 h-10 bg-[#e5f0ea] rounded-lg flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-[#052254]" />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900 text-sm">+{resultado.xp} XP ganhos</div>
-                    <div className="text-xs text-blue-700">Por completar o diagnóstico</div>
+                    <div className="text-xs text-[#052254]">Por completar o diagnóstico</div>
                   </div>
-                  <div className="ml-auto text-blue-500">✓</div>
+                  <div className="ml-auto text-[#052254]">✓</div>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-xl">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-green-600" />
+                <div className="flex items-center gap-3 p-4 bg-[#f5faf7] border border-[#dbe9e2] rounded-xl">
+                  <div className="w-10 h-10 bg-[#e5f0ea] rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-[#329314]" />
                   </div>
                   <div>
                     <div className="font-semibold text-gray-900 text-sm">Trilha desbloqueada</div>
-                    <div className="text-xs text-green-700">{resultado.badge}</div>
+                    <div className="text-xs text-[#0A5740]">{resultado.badge}</div>
                   </div>
-                  <div className="ml-auto text-green-500">✓</div>
+                  <div className="ml-auto text-[#329314]">✓</div>
                 </div>
               </div>
 
@@ -269,7 +269,7 @@ const handleVoltar = () => {
 
               <button
                 onClick={handleContinuar}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-base"
+                className="w-full flex items-center justify-center gap-2 bg-[#052254] hover:bg-[#06173C] text-white font-bold py-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-base"
               >
                 Ver minha trilha
                 <ChevronRight className="w-5 h-5" />
@@ -283,7 +283,7 @@ const handleVoltar = () => {
 
   // ── Telas de perguntas ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-white to-[#f5faf7] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
 
         {/* Header */}
@@ -292,7 +292,7 @@ const handleVoltar = () => {
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-full mb-4 text-sm font-semibold">
+          <div className="inline-flex items-center gap-2 bg-[#052254] text-white px-5 py-2.5 rounded-full mb-4 text-sm font-semibold">
             <Sparkles className="w-4 h-4" />
             Primeiros passos
           </div>
@@ -304,11 +304,11 @@ const handleVoltar = () => {
         <div className="mb-8">
           <div className="flex justify-between text-xs text-gray-500 mb-2">
             <span>Pergunta {step + 1} de {totalPerguntas}</span>
-            <span className="font-semibold text-blue-600">{progresso}%</span>
+            <span className="font-semibold text-[#052254]">{progresso}%</span>
           </div>
           <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
+              className="h-full bg-gradient-to-r from-[#052254] to-[#7CAF70] rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progresso}%` }}
               transition={{ duration: 0.3 }}
@@ -326,7 +326,7 @@ const handleVoltar = () => {
           className="bg-white rounded-3xl shadow-xl p-8 mb-6"
         >
           {/* Label do bloco */}
-          <div className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">
+          <div className="text-xs font-bold text-[#052254] uppercase tracking-widest mb-3">
             {blocoAtual}
           </div>
 
@@ -341,16 +341,16 @@ const handleVoltar = () => {
                 onClick={() => handleSelecionar(opcao.value)}
                 className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-150 flex items-center gap-3 ${
                   respostaAtual === opcao.value
-                    ? 'border-blue-600 bg-blue-50 shadow-md'
-                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                    ? 'border-[#052254] bg-[#f5faf7] shadow-md'
+                    : 'border-gray-200 hover:border-[#B2C9BF] hover:bg-gray-50'
                 }`}
               >
                 <span className="text-2xl flex-shrink-0">{opcao.icon}</span>
-                <span className={`font-medium ${respostaAtual === opcao.value ? 'text-blue-900' : 'text-gray-800'}`}>
+                <span className={`font-medium ${respostaAtual === opcao.value ? 'text-[#06173C]' : 'text-gray-800'}`}>
                   {opcao.label}
                 </span>
                 {respostaAtual === opcao.value && (
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 ml-auto flex-shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#052254] ml-auto flex-shrink-0" />
                 )}
               </button>
             ))}
@@ -371,7 +371,7 @@ const handleVoltar = () => {
           <button
             onClick={handleProximo}
             disabled={!respostaAtual}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all duration-150 shadow hover:shadow-md text-base"
+            className="w-full flex items-center justify-center gap-2 bg-[#052254] hover:bg-[#06173C] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all duration-150 shadow hover:shadow-md text-base"
           >
             {step === totalPerguntas - 1 ? "Ver meu resultado" : "Próxima"}
             <ChevronRight className="w-5 h-5" />

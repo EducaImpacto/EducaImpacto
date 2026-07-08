@@ -68,8 +68,8 @@ export function PersonalizedTrailScreen({
   const totalXP = beginnerModules.reduce((total, module) => total + module.xp, 0) + 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-orange-50">
-      <section className="bg-gradient-to-r from-blue-600 via-blue-700 to-emerald-600 text-white py-16">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7]">
+      <section className="bg-gradient-to-r from-[#052254] via-[#06173C] to-[#0A5740] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -85,7 +85,7 @@ export function PersonalizedTrailScreen({
               {userName}, sua jornada começa aqui
             </h1>
 
-            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-[#e5f0ea] mb-8 max-w-3xl mx-auto">
               {profileMessages[profileType]}
             </p>
 
@@ -98,15 +98,15 @@ export function PersonalizedTrailScreen({
             <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="text-3xl font-bold mb-2">4</div>
-                <div className="text-blue-100">Etapas interativas</div>
+                <div className="text-[#e5f0ea]">Etapas interativas</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="text-3xl font-bold mb-2">20</div>
-                <div className="text-blue-100">Missões práticas</div>
+                <div className="text-[#e5f0ea]">Missões práticas</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="text-3xl font-bold mb-2">{totalXP}</div>
-                <div className="text-blue-100">XP disponível</div>
+                <div className="text-[#e5f0ea]">XP disponível</div>
               </div>
             </div>
           </motion.div>
@@ -116,7 +116,7 @@ export function PersonalizedTrailScreen({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <Sparkles className="w-8 h-8 text-blue-600" />
+            <Sparkles className="w-8 h-8 text-[#052254]" />
             <h2 className="text-3xl font-bold text-gray-900">Trilha Iniciante do MVP</h2>
           </div>
           <p className="text-lg text-gray-600">
@@ -131,9 +131,9 @@ export function PersonalizedTrailScreen({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden ring-1 ring-blue-100"
+              className="bg-white rounded-2xl shadow-lg overflow-hidden ring-1 ring-[#B2C9BF]"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2">
+              <div className="bg-gradient-to-r from-[#052254] to-[#0A5740] text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Etapa {index + 1} de 4
               </div>
@@ -144,7 +144,7 @@ export function PersonalizedTrailScreen({
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{module.title}</h3>
                     <p className="text-gray-600">{module.description}</p>
                   </div>
-                  <CheckCircle2 className="w-6 h-6 text-green-500 opacity-40 flex-shrink-0 ml-4" />
+                  <CheckCircle2 className="w-6 h-6 text-[#329314] opacity-40 flex-shrink-0 ml-4" />
                 </div>
 
                 <div className="flex items-center justify-between text-sm">
@@ -152,7 +152,7 @@ export function PersonalizedTrailScreen({
                     <Clock className="w-4 h-4" />
                     <span>{module.duration}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-orange-600 font-semibold">
+                  <div className="flex items-center gap-1 text-[#329314] font-semibold">
                     <TrendingUp className="w-4 h-4" />
                     <span>+{module.xp} XP</span>
                   </div>
@@ -163,24 +163,24 @@ export function PersonalizedTrailScreen({
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6">
+          <div className="bg-[#f5faf7] border-l-4 border-[#052254] rounded-lg p-6">
             <div className="flex items-start gap-3">
-              <FileText className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+              <FileText className="w-6 h-6 text-[#052254] mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-bold text-blue-900 mb-2">Recompensa final</h3>
-                <p className="text-sm text-blue-800">
+                <h3 className="font-bold text-[#06173C] mb-2">Recompensa final</h3>
+                <p className="text-sm text-[#06173C]">
                   Ao concluir as missões, suas respostas serão organizadas em uma prévia de plano de negócios profissional e estruturado.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-6">
+          <div className="bg-[#f5faf7] border-l-4 border-[#329314] rounded-lg p-6">
             <div className="flex items-start gap-3">
-              <Lock className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
+              <Lock className="w-6 h-6 text-[#329314] mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-bold text-orange-900 mb-2">Próximas trilhas</h3>
-                <p className="text-sm text-orange-800">
+                <h3 className="font-bold text-[#0A5740] mb-2">Próximas trilhas</h3>
+                <p className="text-sm text-[#0A5740]">
                   Trilhas intermediária e avançada ficam registradas no diagnóstico, mas entram em uma próxima versão do produto.
                 </p>
               </div>
@@ -192,15 +192,15 @@ export function PersonalizedTrailScreen({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="bg-gradient-to-r from-orange-500 to-emerald-500 rounded-3xl p-8 md:p-12 text-white text-center"
+          className="bg-gradient-to-r from-[#329314] to-[#329314] rounded-3xl p-8 md:p-12 text-white text-center"
         >
           <h2 className="text-3xl font-bold mb-4">
             Pronto para dar o primeiro passo no seu negócio?
           </h2>
-          <p className="text-xl text-orange-50 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-[#f5faf7] mb-8 max-w-2xl mx-auto">
             Você vai aprender conceitos essenciais e aplicar cada resposta diretamente na construção do seu plano.
           </p>
-          <Button variant="secondary" size="lg" onClick={onStartTrail} className="bg-white text-orange-600 hover:bg-orange-50">
+          <Button variant="secondary" size="lg" onClick={onStartTrail} className="bg-white text-[#329314] hover:bg-[#f5faf7]">
             Começar minha jornada
             <Sparkles className="w-5 h-5 ml-2 inline" />
           </Button>

@@ -18,12 +18,12 @@ export function ProgressBar({ progress, showLabel = true, height = 'md' }: Progr
       {showLabel && (
         <div className="flex justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">Progresso</span>
-          <span className="text-sm font-semibold text-blue-600">{progress}%</span>
+          <span className="text-sm font-semibold text-[#052254]">{progress}%</span>
         </div>
       )}
       <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${heights[height]}`}>
         <div
-          className="h-full bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-500 ease-out"
+          className="h-full bg-gradient-to-r from-[#052254] via-[#0A5740] to-[#329314] transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>

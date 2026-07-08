@@ -37,12 +37,12 @@ export function DashboardScreen({
   const nextModule = modules.find((module) => !module.completed && !module.locked);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] to-[#f5faf7]">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Sparkles className="w-8 h-8 text-blue-600" />
+              <Sparkles className="w-8 h-8 text-[#052254]" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Dashboard da Trilha</h1>
                 <p className="text-sm text-gray-600">Acompanhe seu progresso na construção do plano de negócios</p>
@@ -64,28 +64,28 @@ export function DashboardScreen({
                   <h2 className="text-xl font-bold text-gray-900">Progresso Geral</h2>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">{overallProgress}%</div>
+                  <div className="text-2xl font-bold text-[#052254]">{overallProgress}%</div>
                   <div className="text-xs text-gray-500">da trilha</div>
                 </div>
               </div>
               <ProgressBar progress={overallProgress} height="lg" />
               <div className="mt-4 flex items-center justify-between text-sm">
                 <span className="text-gray-600">{completedMissions} de {totalMissions} missões concluídas</span>
-                <span className="font-semibold text-blue-600">{completedModules} de {modules.length} etapas completas</span>
+                <span className="font-semibold text-[#052254]">{completedModules} de {modules.length} etapas completas</span>
               </div>
             </div>
 
             {nextModule && (
-              <div className="bg-gradient-to-r from-blue-600 to-emerald-600 rounded-2xl shadow-lg p-8 text-white">
+              <div className="bg-gradient-to-r from-[#052254] to-[#0A5740] rounded-2xl shadow-lg p-8 text-white">
                 <h2 className="text-2xl font-bold mb-2">Continue sua próxima missão</h2>
-                <p className="text-blue-100 mb-6">
+                <p className="text-[#e5f0ea] mb-6">
                   Próxima etapa liberada: {nextModule.title}. Cada resposta aproxima seu plano de negócios da versão final.
                 </p>
                 <Button
                   variant="secondary"
                   size="lg"
                   onClick={() => onModuleClick(nextModule.id)}
-                  className="!bg-white !text-blue-600 hover:!bg-blue-50"
+                  className="!bg-white !text-[#052254] hover:!bg-[#f5faf7]"
                 >
                   Continuar Trilha
                 </Button>
@@ -111,8 +111,8 @@ export function DashboardScreen({
             <div
               className={`rounded-2xl shadow-lg p-8 text-white ${
                 canGeneratePlan
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                  : 'bg-gradient-to-r from-amber-500 to-orange-500'
+                  ? 'bg-gradient-to-r from-[#0A5740] to-[#329314]'
+                  : 'bg-gradient-to-r from-[#3B8528] to-[#329314]'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -123,7 +123,7 @@ export function DashboardScreen({
                         Plano de Negócios desbloqueado
                       </h2>
 
-                      <p className="text-green-100 mb-6">
+                      <p className="text-[#e5f0ea] mb-6">
                         Você completou todas as missões! A IA vai organizar suas respostas em um plano estruturado.
                       </p>
 
@@ -131,7 +131,7 @@ export function DashboardScreen({
                         variant="secondary"
                         size="lg"
                         onClick={onGeneratePlan}
-                        className="!bg-white !text-green-600 hover:!bg-green-50"
+                        className="!bg-white !text-[#329314] hover:!bg-[#f5faf7]"
                       >
                         <FileDown className="w-5 h-5 mr-2 inline" />
                         Gerar Plano de Negócios
@@ -143,7 +143,7 @@ export function DashboardScreen({
                         Plano de Negócios bloqueado
                       </h2>
 
-                      <p className="text-orange-100">
+                      <p className="text-[#e5f0ea]">
                         Responda todas as missões da trilha para desbloquear a geração automática do Plano de Negócios. Você já concluiu <strong>{completedMissions}</strong> de <strong>{totalMissions}</strong> missões.
                       </p>
                     </>
@@ -158,25 +158,25 @@ export function DashboardScreen({
 
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
+                <BarChart3 className="w-5 h-5 text-[#052254]" />
                 <h3 className="font-bold text-gray-900">Indicadores MVP</h3>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <span className="text-gray-600 text-sm">Missões concluídas</span>
-                  <span className="font-bold text-green-600">{completedMissions}</span>
+                  <span className="font-bold text-[#329314]">{completedMissions}</span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <span className="text-gray-600 text-sm">Missões pendentes</span>
-                  <span className="font-bold text-orange-600">{totalMissions - completedMissions}</span>
+                  <span className="font-bold text-[#329314]">{totalMissions - completedMissions}</span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <span className="text-gray-600 text-sm">Nível atual</span>
-                  <span className="font-bold text-blue-600">{level}</span>
+                  <span className="font-bold text-[#052254]">{level}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 text-sm">XP acumulado</span>
-                  <span className="font-bold text-purple-600">{xp}</span>
+                  <span className="font-bold text-[#0A5740]">{xp}</span>
                 </div>
               </div>
             </div>
@@ -191,12 +191,12 @@ export function DashboardScreen({
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl p-6 border-2 border-blue-200">
+            <div className="bg-gradient-to-br from-[#e5f0ea] to-[#e5f0ea] rounded-2xl p-6 border-2 border-[#B2C9BF]">
               <div className="flex items-start gap-3">
-                <Sparkles className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+                <Sparkles className="w-6 h-6 text-[#052254] flex-shrink-0 mt-1" />
                 <div>
-                  <h4 className="font-bold text-blue-900 mb-2">Dica</h4>
-                  <p className="text-sm text-blue-800">
+                  <h4 className="font-bold text-[#06173C] mb-2">Dica</h4>
+                  <p className="text-sm text-[#06173C]">
                     Responda com exemplos concretos. Isso ajuda a gerar um plano mais claro, profissional e útil.
                   </p>
                 </div>

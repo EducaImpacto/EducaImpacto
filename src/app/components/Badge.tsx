@@ -16,10 +16,10 @@ export function Badge({ type = 'award', label, color = 'blue' }: BadgeProps) {
   };
 
   const colors = {
-    blue: 'bg-blue-100 text-blue-700 border-blue-300',
-    orange: 'bg-orange-100 text-orange-700 border-orange-300',
-    green: 'bg-green-100 text-green-700 border-green-300',
-    purple: 'bg-purple-100 text-purple-700 border-purple-300',
+    blue: 'bg-[#e5f0ea] text-[#052254] border-[#B2C9BF]',
+    orange: 'bg-[#e5f0ea] text-[#0A5740] border-[#7CAF70]',
+    green: 'bg-[#e5f0ea] text-[#0A5740] border-[#7CAF70]',
+    purple: 'bg-[#e5f0ea] text-[#0A5740] border-[#7CAF70]',
   };
 
   const Icon = icons[type];

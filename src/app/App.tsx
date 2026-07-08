@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LandingPage } from './screens/LandingPage';
 import { DiagnosticScreen } from './screens/DiagnosticScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -8,6 +8,7 @@ import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
 import { AppFooter } from './components/AppFooter';
 import { DiagnosticData } from './screens/DiagnosticScreen';
+import { isAdequateAnswer } from './utils/answerValidation';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 type Screen =
@@ -254,6 +255,14 @@ interface PersistedState {
   nivel: number;
 }
 
+interface NavigationState {
+  screen: Screen;
+  etapaIndex: number;
+  missaoIndex: number;
+  editingMissionId: number | null;
+  editReturnScreen: EditReturnScreen;
+}
+
 function readPersistedState(): Partial<PersistedState> | null {
   if (typeof window === 'undefined') return null;
 
@@ -283,6 +292,8 @@ function getPlanBlocksByEtapa(etapa: number): string[] {
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
+  const isRestoringHistory = useRef(false);
+  const lastHistoryKey = useRef('');
   const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
     useEffect(() => {
     window.scrollTo({
@@ -332,6 +343,62 @@ export default function App() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [diagnosticData, etapaIndex, missaoIndex, nivel, respostas, screen, xp]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const applyNavigationState = (state: NavigationState) => {
+      isRestoringHistory.current = true;
+      setScreen(state.screen);
+      setEtapaIndex(state.etapaIndex);
+      setMissaoIndex(state.missaoIndex);
+      setEditingMissionId(state.editingMissionId);
+      setEditReturnScreen(state.editReturnScreen);
+    };
+
+    const initialState: NavigationState = {
+      screen,
+      etapaIndex,
+      missaoIndex,
+      editingMissionId,
+      editReturnScreen,
+    };
+
+    window.history.replaceState(initialState, '', window.location.href);
+    lastHistoryKey.current = JSON.stringify(initialState);
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (!event.state) return;
+      applyNavigationState(event.state as NavigationState);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const navigationState: NavigationState = {
+      screen,
+      etapaIndex,
+      missaoIndex,
+      editingMissionId,
+      editReturnScreen,
+    };
+    const nextHistoryKey = JSON.stringify(navigationState);
+
+    if (isRestoringHistory.current) {
+      isRestoringHistory.current = false;
+      lastHistoryKey.current = nextHistoryKey;
+      return;
+    }
+
+    if (nextHistoryKey !== lastHistoryKey.current) {
+      window.history.pushState(navigationState, '', window.location.href);
+      lastHistoryKey.current = nextHistoryKey;
+    }
+  }, [editReturnScreen, editingMissionId, etapaIndex, missaoIndex, screen]);
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   const etapaIndexSeguro = etapaIndex >= 0 && etapaIndex < ETAPAS.length ? etapaIndex : 0;
   const etapaAtual = ETAPAS[etapaIndexSeguro];
@@ -351,12 +418,13 @@ export default function App() {
     etapa.missions
       .map((mission) => ({
         missionId: String(mission.id),
+        moduleId: etapa.id,
         moduleTitle: etapa.label,
         missionTitle: mission.title,
         answer: respostas[mission.id],
         planBlocks: getPlanBlocksByEtapa(etapa.id),
       }))
-      .filter((mission) => Boolean(mission.answer))
+      .filter((mission) => isAdequateAnswer(mission.answer))
   );
 
   const currentModuleAnswers = etapaAtual.missions
@@ -365,12 +433,12 @@ export default function App() {
       missionTitle: mission.title,
       answer: respostas[mission.id],
     }))
-    .filter((mission) => Boolean(mission.answer));
+    .filter((mission) => isAdequateAnswer(mission.answer));
 
-  const completedMissionCount = Object.values(respostas).filter(Boolean).length;
+  const completedMissionCount = Object.values(respostas).filter(isAdequateAnswer).length;
   const overallProgress = Math.round((completedMissionCount / TOTAL_MISSIONS) * 100);
   const modules: Module[] = ETAPAS.map((etapa) => {
-    const answeredMissions = etapa.missions.filter((mission) => Boolean(respostas[mission.id])).length;
+    const answeredMissions = etapa.missions.filter((mission) => isAdequateAnswer(respostas[mission.id])).length;
 
     return {
       id: etapa.id,
@@ -408,7 +476,7 @@ export default function App() {
     if (moduleIndex === -1) return;
 
     const firstUnansweredMissionIndex = ETAPAS[moduleIndex].missions.findIndex(
-      (mission) => !respostas[mission.id]
+      (mission) => !isAdequateAnswer(respostas[mission.id])
     );
 
     setDiagnosticData((current) => current ?? DEFAULT_DIAGNOSTIC_DATA);
@@ -418,22 +486,24 @@ export default function App() {
     setScreen('mission');
   };
 
-  const handlePreviousMission = () => {
-    // Voltando durante edição
+  const handlePreviousPage = () => {
     if (editingMissionId !== null) {
       setEditingMissionId(null);
       setScreen(editReturnScreen);
       return;
     }
 
-    // Ainda existem perguntas anteriores neste módulo
-    if (missaoIndex > 0) {
-      setMissaoIndex((i) => i - 1);
-      return;
-    }
-
-    // Primeira pergunta do módulo → volta para o Dashboard
     setScreen('dashboard');
+  };
+
+  const handlePreviousQuestion = () => {
+    if (missaoIndex > 0) {
+      if (editingMissionId !== null) {
+        const previousMission = etapaAtual.missions[missaoIndex - 1];
+        setEditingMissionId(previousMission.id);
+      }
+      setMissaoIndex((i) => i - 1);
+    }
   };
 
   const handleNextMission = (answer: string) => {
@@ -555,19 +625,22 @@ export default function App() {
           currentModuleMissionNumber={missaoIndexSeguro + 1}
           initialAnswer={respostas[missaoAtual.id] ?? ''}
           isEditing={editingMissionId !== null}
-          canGoBack
-          backLabel={
-            missaoIndex > 0 || editingMissionId !== null
-              ? 'Voltar pergunta'
+          canGoBackQuestion={missaoIndex > 0}
+          pageBackLabel={
+            editingMissionId !== null
+              ? editReturnScreen === 'business-plan'
+                ? 'Voltar ao plano'
+                : 'Voltar ao resumo'
               : 'Voltar aos módulos'
           }
           onNext={handleNextMission}
-          onBack={handlePreviousMission}
+          onBackQuestion={handlePreviousQuestion}
+          onBackPage={handlePreviousPage}
         />
       )}
 
       {screen === 'mission' && !missaoAtual && (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center px-4">
+        <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] to-white flex items-center justify-center px-4">
           <p className="text-sm font-medium text-gray-600">Preparando sua primeira missão...</p>
         </div>
       )}
@@ -596,6 +669,11 @@ export default function App() {
         <BusinessPlanScreen
           diagnosticData={activeDiagnosticData}
           answers={businessPlanAnswers}
+          moduleAnswerTargets={ETAPAS.map((etapa) => ({
+            moduleId: etapa.id,
+            title: etapa.label,
+            total: etapa.missions.length,
+          }))}
           onDownload={handleDownloadPlan}
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
           onShare={() => alert('Compartilhamento disponível em breve!')}

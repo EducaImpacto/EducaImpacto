@@ -32,7 +32,7 @@ export function ModuleCompletedScreen({
   onNextModule
 }: ModuleCompletedScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -45,7 +45,7 @@ export function ModuleCompletedScreen({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-24 h-24 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+            className="w-24 h-24 bg-gradient-to-br from-[#329314] to-[#329314] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
           >
             <Trophy className="w-12 h-12 text-white" />
           </motion.div>
@@ -76,7 +76,7 @@ export function ModuleCompletedScreen({
             className="mb-8 text-left"
           >
             <div className="flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <CheckCircle2 className="w-5 h-5 text-[#329314]" />
               <h3 className="text-lg font-bold text-gray-900">Respostas deste módulo</h3>
             </div>
 
@@ -84,11 +84,11 @@ export function ModuleCompletedScreen({
               {answers.map((answer) => (
                 <div key={answer.missionId} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <div className="flex items-start justify-between gap-3 mb-1">
-                    <div className="text-sm font-semibold text-blue-700">{answer.missionTitle}</div>
+                    <div className="text-sm font-semibold text-[#052254]">{answer.missionTitle}</div>
                     <button
                       type="button"
                       onClick={() => onEditAnswer(answer.missionId)}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-900"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#052254] hover:text-[#06173C]"
                     >
                       <Edit className="w-3.5 h-3.5" />
                       Editar
@@ -105,13 +105,13 @@ export function ModuleCompletedScreen({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.5, type: "spring" }}
-            className="bg-gradient-to-r from-orange-100 to-yellow-100 border-2 border-orange-300 rounded-2xl p-6 mb-6"
+            className="bg-gradient-to-r from-[#e5f0ea] to-[#e5f0ea] border-2 border-[#7CAF70] rounded-2xl p-6 mb-6"
           >
             <div className="flex items-center justify-center gap-3">
-              <Star className="w-8 h-8 text-orange-600" />
+              <Star className="w-8 h-8 text-[#329314]" />
               <div className="text-left">
-                <div className="text-sm text-orange-700 font-medium">XP Ganho</div>
-                <div className="text-3xl font-bold text-orange-600">+{xpGained} XP</div>
+                <div className="text-sm text-[#0A5740] font-medium">XP Ganho</div>
+                <div className="text-3xl font-bold text-[#329314]">+{xpGained} XP</div>
               </div>
             </div>
           </motion.div>
@@ -175,7 +175,7 @@ export function ModuleCompletedScreen({
                 repeat: Infinity,
                 delay: i * 0.2,
               }}
-              className="w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-sm"
+              className="w-3 h-3 bg-gradient-to-br from-[#7CAF70] to-[#329314] rounded-sm"
             />
           ))}
         </motion.div>

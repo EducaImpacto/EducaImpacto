@@ -9,15 +9,23 @@ type ProfileType = 'iniciante' | 'intermediario' | 'avancado';
 
 interface MissionAnswer {
   missionId: string;
+  moduleId: number;
   moduleTitle: string;
   missionTitle: string;
   answer: string;
   planBlocks: string[];
 }
 
+interface ModuleAnswerTarget {
+  moduleId: number;
+  title: string;
+  total: number;
+}
+
 interface BusinessPlanScreenProps {
   diagnosticData: DiagnosticData;
   answers: MissionAnswer[];
+  moduleAnswerTargets: ModuleAnswerTarget[];
   onDownload: () => void;
   onEditAnswer: (missionId: string) => void;
   onShare: () => void;
@@ -56,6 +64,7 @@ const profileLabels: Record<ProfileType, string> = {
 export function BusinessPlanScreen({
   diagnosticData,
   answers,
+  moduleAnswerTargets,
   onDownload,
   onEditAnswer,
   onShare,
@@ -66,19 +75,24 @@ export function BusinessPlanScreen({
   const [activeSectionIndex, setActiveSectionIndex] = useState(0);
 
   const answersBySection = useMemo(() => {
-    const answersPerSection = 5;
+    return planSections.map((section) => {
+      const target = moduleAnswerTargets.find((module) => module.title === section.title);
+      const sectionAnswers = answers.filter((answer) => answer.moduleTitle === section.title);
 
-    return planSections.map((section, index) => ({
-      ...section,
-      answers: answers.slice(index * answersPerSection, (index + 1) * answersPerSection),
-    }));
-  }, [answers]);
+      return {
+        ...section,
+        moduleId: target?.moduleId,
+        totalAnswers: target?.total ?? sectionAnswers.length,
+        answers: sectionAnswers,
+      };
+    });
+  }, [answers, moduleAnswerTargets]);
 
   const activeSection = answersBySection[activeSectionIndex] ?? answersBySection[0];
   const activeSectionAnswerCount = activeSection?.answers.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
@@ -86,14 +100,14 @@ export function BusinessPlanScreen({
           transition={{ duration: 0.5 }}
           className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-8"
         >
-          <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 px-8 py-12 text-center">
+          <div className="bg-gradient-to-r from-[#329314] via-[#0A5740] to-[#329314] px-8 py-12 text-center">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
             >
-              <CheckCircle2 className="w-12 h-12 text-green-500" />
+              <CheckCircle2 className="w-12 h-12 text-[#329314]" />
             </motion.div>
 
             <motion.h1
@@ -109,7 +123,7 @@ export function BusinessPlanScreen({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-xl text-green-100 mb-6"
+              className="text-xl text-[#e5f0ea] mb-6"
             >
               A IA organizou suas respostas em uma estrutura profissional para apresentar e validar sua ideia.
             </motion.p>
@@ -154,7 +168,7 @@ export function BusinessPlanScreen({
                   <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
                     {answersBySection.map((section, index) => {
                       const isActive = index === activeSectionIndex;
-                      const isComplete = section.answers.length === 5;
+                      const isComplete = section.answers.length === section.totalAnswers;
 
                       return (
                         <button
@@ -163,13 +177,13 @@ export function BusinessPlanScreen({
                           onClick={() => setActiveSectionIndex(index)}
                           className={`min-w-[180px] rounded-2xl px-4 py-3 text-left transition-all ${
                             isActive
-                              ? 'bg-blue-600 text-white shadow-md'
+                              ? 'bg-[#052254] text-white shadow-md'
                               : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                           }`}
                         >
                           <div className="text-sm font-bold">{section.title}</div>
-                          <div className={`mt-1 text-xs ${isActive ? 'text-blue-100' : 'text-gray-500'}`}>
-                            {section.answers.length}/5 respostas{isComplete ? ' concluído' : ''}
+                          <div className={`mt-1 text-xs ${isActive ? 'text-[#e5f0ea]' : 'text-gray-500'}`}>
+                            {section.answers.length}/{section.totalAnswers} respostas{isComplete ? ' concluído' : ''}
                           </div>
                         </button>
                       );
@@ -181,7 +195,7 @@ export function BusinessPlanScreen({
                   <div className="border border-gray-200 rounded-2xl p-5">
                     <div className="flex items-start justify-between gap-4 mb-4">
                       <div className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
+                        <CheckCircle2 className="w-5 h-5 text-[#329314] flex-shrink-0 mt-1" />
                         <div>
                           <h3 className="font-bold text-gray-900">{activeSection.title}</h3>
                           <p className="text-sm text-gray-600">{activeSection.description}</p>
@@ -196,13 +210,13 @@ export function BusinessPlanScreen({
                       {activeSection.answers.map((answer) => (
                         <div key={`${activeSection.title}-${answer.missionId}`} className="bg-gray-50 rounded-xl p-4">
                           <div className="flex items-start justify-between gap-3 mb-1">
-                            <div className="text-sm font-semibold text-blue-700">
+                            <div className="text-sm font-semibold text-[#052254]">
                               {answer.missionTitle}
                             </div>
                             <button
                               type="button"
                               onClick={() => onEditAnswer(answer.missionId)}
-                              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 hover:text-blue-900"
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-[#052254] hover:text-[#06173C]"
                             >
                               <Edit className="w-3.5 h-3.5" />
                               Editar
@@ -240,9 +254,9 @@ export function BusinessPlanScreen({
               </div>
 
               <aside className="space-y-5">
-                <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-5">
-                  <h3 className="font-bold text-blue-900 mb-3">Estrutura contemplada</h3>
-                  <div className="space-y-2 text-sm text-blue-900">
+                <div className="bg-[#f5faf7] border-l-4 border-[#052254] rounded-lg p-5">
+                  <h3 className="font-bold text-[#06173C] mb-3">Estrutura contemplada</h3>
+                  <div className="space-y-2 text-sm text-[#06173C]">
                     {[
                       'Contexto do Negócio',
                       'Cliente',
@@ -250,7 +264,7 @@ export function BusinessPlanScreen({
                       'Solução e Viabilidade',
                     ].map((item) => (
                       <div key={item} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        <CheckCircle2 className="w-4 h-4 text-[#329314]" />
                         <span>{item}</span>
                       </div>
                     ))}
@@ -264,7 +278,7 @@ export function BusinessPlanScreen({
                   </p>
                   <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-600 to-green-500"
+                      className="h-full bg-gradient-to-r from-[#052254] to-[#329314]"
                       style={{ width: `${Math.min(100, (new Set(answers.flatMap((answer) => answer.planBlocks)).size / 10) * 100)}%` }}
                     />
                   </div>
@@ -289,8 +303,8 @@ export function BusinessPlanScreen({
               </Button>
             </div>
 
-            <div className="bg-blue-50 border-l-4 border-blue-600 rounded-lg p-5">
-              <p className="text-sm text-blue-900">
+            <div className="bg-[#f5faf7] border-l-4 border-[#052254] rounded-lg p-5">
+              <p className="text-sm text-[#06173C]">
                 <strong>Próximo passo:</strong> use esta prévia para validar se o plano representa bem o negócio e identificar pontos que precisam de pesquisa de mercado, custos reais e projeções financeiras.
               </p>
             </div>
@@ -304,7 +318,7 @@ export function BusinessPlanScreen({
           className="bg-white rounded-2xl shadow-lg p-8 mb-8"
         >
           <div className="flex items-center gap-3 mb-6">
-            <MessageSquare className="w-6 h-6 text-blue-600" />
+            <MessageSquare className="w-6 h-6 text-[#052254]" />
             <h2 className="text-2xl font-bold text-gray-900">Validação da experiência</h2>
           </div>
 
@@ -317,7 +331,7 @@ export function BusinessPlanScreen({
                     key={value}
                     onClick={() => setRating(value)}
                     className={`w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all ${
-                      rating >= value ? 'bg-orange-100 border-orange-500 text-orange-600' : 'border-gray-200 text-gray-400'
+                      rating >= value ? 'bg-[#e5f0ea] border-[#329314] text-[#329314]' : 'border-gray-200 text-gray-400'
                     }`}
                     aria-label={`Avaliar com ${value}`}
                   >
@@ -339,7 +353,7 @@ export function BusinessPlanScreen({
                 value={feedback}
                 onChange={(event) => setFeedback(event.target.value)}
                 placeholder="Exemplo: As perguntas sobre cliente ajudaram bastante, mas senti dificuldade na parte de custos..."
-                className="w-full min-h-[140px] p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none resize-none"
+                className="w-full min-h-[140px] p-4 border-2 border-gray-200 rounded-xl focus:border-[#052254] focus:outline-none resize-none"
               />
             </div>
           </div>

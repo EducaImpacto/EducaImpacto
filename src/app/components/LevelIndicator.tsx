@@ -11,14 +11,14 @@ export function LevelIndicator({ level, xp, nextLevelXp }: LevelIndicatorProps) 
   const progress = (xp / nextLevelXp) * 100;
 
   return (
-    <div className="bg-white rounded-xl p-4 border-2 border-blue-200 shadow-sm">
+    <div className="bg-white rounded-xl p-4 border-2 border-[#B2C9BF] shadow-sm">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#052254] to-[#0A5740] flex items-center justify-center">
           <TrendingUp className="w-6 h-6 text-white" />
         </div>
         <div>
           <div className="text-sm text-gray-600">Nível Atual</div>
-          <div className="text-2xl font-bold text-blue-600">{level}</div>
+          <div className="text-2xl font-bold text-[#052254]">{level}</div>
         </div>
       </div>
       <div className="space-y-1">
@@ -28,7 +28,7 @@ export function LevelIndicator({ level, xp, nextLevelXp }: LevelIndicatorProps) 
         </div>
         <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-500"
+            className="h-full bg-gradient-to-r from-[#329314] to-[#7CAF70] transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>

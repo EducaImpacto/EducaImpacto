@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '../components/Button';
 import { Brain, CheckCircle2, ClipboardCheck, FileText, Lightbulb, Medal, PenLine, Rocket, Sparkles, Target, ArrowRight } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { BrandLogo } from '../components/BrandLogo';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -10,15 +11,12 @@ interface LandingPageProps {
 
 export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-[#f5faf7]">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-8 h-8 text-blue-600" />
-              <span className="text-2xl font-bold text-blue-600">Educa Impacto</span>
-            </div>
+            <BrandLogo />
             <div className="hidden items-center gap-3 sm:flex">
               <Button variant="outline" onClick={onOpenModules} size="md">Ver módulos</Button>
               <Button onClick={onStart} size="md">Começar Diagnóstico</Button>
@@ -32,7 +30,7 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Do Sonho ao <span className="text-blue-600">Negócio</span>
+              Do Sonho ao <span className="text-[#052254]">Negócio</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8">
               Comece pelo diagnóstico, avance por missões práticas e construa um plano de negócios com apoio de IA.
@@ -52,21 +50,21 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <Medal className="w-5 h-5 text-orange-500" />
+                <Medal className="w-5 h-5 text-[#329314]" />
                 <span>XP e insígnias</span>
               </div>
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-blue-600" />
+                <Sparkles className="w-5 h-5 text-[#052254]" />
                 <span>Apoio de IA</span>
               </div>
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-green-600" />
+                <FileText className="w-5 h-5 text-[#329314]" />
                 <span>Plano estruturado</span>
               </div>
             </div>
           </div>
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-green-400 rounded-2xl transform rotate-3 opacity-20"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#052254] via-[#0A5740] to-[#329314] rounded-2xl transform rotate-3 opacity-20"></div>
             <ImageWithFallback
               src="/empreendedor.jpg"
               alt="Empreendedor usando tecnologia [1200x1000]"
@@ -86,10 +84,10 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
             {/* Linha de Progresso */}
-            <div className="hidden lg:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-blue-200 via-orange-400 to-green-400 transform translate-y-1/2" style={{ width: 'calc(100% - 8rem)', left: '4rem' }}></div>
+            <div className="hidden lg:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-[#B2C9BF] via-[#329314] to-[#7CAF70] transform translate-y-1/2" style={{ width: 'calc(100% - 8rem)', left: '4rem' }}></div>
             
-            <div className="relative bg-blue-50 rounded-2xl p-6 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="relative bg-[#f5faf7] rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#052254] to-[#0A5740] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <ClipboardCheck className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">1. Diagnóstico</h3>
@@ -98,8 +96,8 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
               </p>
             </div>
 
-            <div className="relative bg-orange-50 rounded-2xl p-6 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-600 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="relative bg-[#f5faf7] rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#0A5740] to-[#329314] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <Lightbulb className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">2. Aprenda</h3>
@@ -108,8 +106,8 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
               </p>
             </div>
 
-            <div className="relative bg-purple-50 rounded-2xl p-6 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="relative bg-[#f5faf7] rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#052254] to-[#329314] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <PenLine className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">3. Aplique em Missões</h3>
@@ -118,8 +116,8 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
               </p>
             </div>
 
-            <div className="relative bg-green-50 rounded-2xl p-6 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="relative bg-[#f5faf7] rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#329314] to-[#0A5740] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <FileText className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">4. Gere seu Plano</h3>
@@ -132,7 +130,7 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
       </section>
 
       {/* Benefícios */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+      <section className="py-20 bg-gradient-to-br from-[#f5faf7] to-[#f5faf7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Por que Educa Impacto?</h2>
@@ -141,40 +139,40 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
             <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <Brain className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-[#e5f0ea] rounded-lg flex items-center justify-center mb-4">
+                <Brain className="w-6 h-6 text-[#052254]" />
               </div>
               <h3 className="font-bold text-lg mb-2">Linguagem Simples</h3>
               <p className="text-gray-600 text-sm">Perguntas diretas e explicações claras para avançar sem travar.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                <Target className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-[#e5f0ea] rounded-lg flex items-center justify-center mb-4">
+                <Target className="w-6 h-6 text-[#329314]" />
               </div>
               <h3 className="font-bold text-lg mb-2">Construção Progressiva</h3>
               <p className="text-gray-600 text-sm">Cada missão coleta uma parte útil do seu futuro plano de negócios.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Medal className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-[#e5f0ea] rounded-lg flex items-center justify-center mb-4">
+                <Medal className="w-6 h-6 text-[#329314]" />
               </div>
               <h3 className="font-bold text-lg mb-2">Gamificação Discreta</h3>
               <p className="text-gray-600 text-sm">XP, progresso e insígnias ajudam a manter a sensação de avanço.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <Sparkles className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-[#e5f0ea] rounded-lg flex items-center justify-center mb-4">
+                <Sparkles className="w-6 h-6 text-[#0A5740]" />
               </div>
               <h3 className="font-bold text-lg mb-2">IA de Apoio</h3>
               <p className="text-gray-600 text-sm">Sugestões para melhorar suas respostas durante a jornada.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <FileText className="w-6 h-6 text-emerald-600" />
+              <div className="w-12 h-12 bg-[#e5f0ea] rounded-lg flex items-center justify-center mb-4">
+                <FileText className="w-6 h-6 text-[#329314]" />
               </div>
               <h3 className="font-bold text-lg mb-2">Plano Profissional</h3>
               <p className="text-gray-600 text-sm">Organização das respostas em uma estrutura de plano de negócios.</p>
@@ -193,7 +191,7 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#052254] to-[#329314] rounded-full flex items-center justify-center mx-auto mb-6">
                 <Lightbulb className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-3">Quem tem uma ideia</h3>
@@ -201,7 +199,7 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
             </div>
 
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#329314] to-[#0A5740] rounded-full flex items-center justify-center mx-auto mb-6">
                 <Rocket className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-3">Quem está começando do zero</h3>
@@ -209,7 +207,7 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
             </div>
 
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#329314] to-[#329314] rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle2 className="w-10 h-10 text-white" />
               </div>
               <h3 className="text-xl font-bold mb-3">Quem precisa validar</h3>
@@ -220,12 +218,12 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
       </section>
 
       {/* Chamada Final */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <section className="py-20 bg-gradient-to-r from-[#052254] to-[#0A5740]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             O futuro do empreendedorismo será inclusivo.
           </h2>
-          <p className="text-xl text-blue-100 mb-10">
+          <p className="text-xl text-[#e5f0ea] mb-10">
             Inicie pelo diagnóstico e veja sua ideia ganhar forma em uma trilha guiada.
           </p>
           <Button variant="secondary" size="lg" onClick={onStart}>
@@ -248,11 +246,10 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
       <footer className="bg-gray-900 text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Sparkles className="w-6 h-6 text-blue-500" />
-              <span className="text-xl font-bold text-white">Educa Impacto</span>
+            <div className="mb-4 md:mb-0">
+              <BrandLogo inverted />
             </div>
-            <p className="text-sm">© 2026 Educa Impacto. Transformando ideias em negócios.</p>
+            <p className="text-sm">© 2026 EducaImpacto. Transformando ideias em negócios.</p>
           </div>
         </div>
       </footer>
