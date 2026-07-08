@@ -234,7 +234,7 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <div className="mb-4 md:mb-0">
-              <BrandLogo className="h-12 sm:h-14" />
+              <BrandLogo className="h-16 sm:h-20" />
             </div>
             <p className="text-sm">© 2026 EducaImpacto. Transformando ideias em negócios.</p>
           </div>

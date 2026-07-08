@@ -10,7 +10,7 @@ interface AppHeaderProps {
 export function AppHeader({ onHome, onOpenModules }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-[60] border-b border-[#dbe9e2] bg-white/95 shadow-sm backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={onHome}
@@ -20,7 +20,7 @@ export function AppHeader({ onHome, onOpenModules }: AppHeaderProps) {
           <BrandLogo />
         </button>
 
-        <nav className="flex items-center gap-1 sm:gap-2" aria-label="Navegação principal">
+        <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label="Navegação principal">
           <button
             type="button"
             onClick={onHome}
