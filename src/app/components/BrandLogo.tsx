@@ -12,7 +12,7 @@ export function BrandLogo({ inverted = false, compact = false, className = '' }:
       <img
         src="/logo-educa-impacto-selo.jpeg"
         alt="Educa Impacto"
-        className={`h-16 w-16 rounded-full object-cover sm:h-20 sm:w-20 ${className}`}
+        className={`h-11 w-11 rounded-full object-cover sm:h-12 sm:w-12 ${className}`}
       />
     );
   }
@@ -21,7 +21,7 @@ export function BrandLogo({ inverted = false, compact = false, className = '' }:
     <img
       src="/logo-educa-impacto-horizontal.jpeg"
       alt="Educa Impacto"
-      className={`h-20 w-auto max-w-[260px] rounded-md object-contain sm:h-28 sm:max-w-[420px] ${inverted ? 'bg-white p-1' : ''} ${className}`}
+      className={`h-12 w-auto max-w-[190px] rounded-md object-contain sm:h-14 sm:max-w-[240px] ${inverted ? 'bg-white p-1' : ''} ${className}`}
     />
   );
 }

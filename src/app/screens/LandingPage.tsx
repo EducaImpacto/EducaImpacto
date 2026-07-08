@@ -12,19 +12,6 @@ interface LandingPageProps {
 export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-[#f5faf7]">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center justify-between">
-            <BrandLogo />
-            <div className="hidden items-center gap-3 sm:flex">
-              <Button variant="outline" onClick={onOpenModules} size="md">Ver módulos</Button>
-              <Button onClick={onStart} size="md">Começar Diagnóstico</Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-88px)] flex items-center">
         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -243,11 +230,11 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12">
+      <footer className="border-t border-[#dbe9e2] bg-white py-10 text-[#06173C]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <div className="mb-4 md:mb-0">
-              <BrandLogo inverted />
+              <BrandLogo className="h-12 sm:h-14" />
             </div>
             <p className="text-sm">© 2026 EducaImpacto. Transformando ideias em negócios.</p>
           </div>

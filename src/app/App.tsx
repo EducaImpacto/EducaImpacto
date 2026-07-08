@@ -6,6 +6,7 @@ import { MissionScreen } from './screens/MissionScreen';
 import { ModuleCompletedScreen } from './screens/ModuleCompletedScreen';
 import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
+import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import { DiagnosticData } from './screens/DiagnosticScreen';
 import { isAdequateAnswer } from './utils/answerValidation';
@@ -464,6 +465,12 @@ export default function App() {
     setScreen('dashboard');
   };
 
+  const handleGoHome = () => {
+    setEditingMissionId(null);
+    setScreen('landing');
+    window.scrollTo(0, 0);
+  };
+
   const handleStartTrail = () => {
     setEtapaIndex(0);
     setMissaoIndex(0);
@@ -574,6 +581,8 @@ export default function App() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
+      <AppHeader onHome={handleGoHome} onOpenModules={handleOpenModules} />
+
       {screen === 'landing' && (
         <LandingPage onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />
       )}
@@ -609,7 +618,6 @@ export default function App() {
           canGeneratePlan={completedMissionCount === TOTAL_MISSIONS}
           onModuleClick={handleModuleClick}
           onGeneratePlan={() => setScreen('business-plan')}
-          onHome={() => setScreen('landing')}
         />
       )}
 

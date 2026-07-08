@@ -108,7 +108,7 @@ export function MissionScreen({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] to-white">
-      <div className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="bg-white shadow-sm sticky top-[73px] z-40">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center gap-3 mb-1">
             <span className="text-xs font-semibold text-gray-500">
