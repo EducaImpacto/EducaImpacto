@@ -3,6 +3,7 @@ import type { Database, Json } from '../lib/database.types';
 
 type Tables = Database['public']['Tables'];
 type BusinessProjectInsert = Tables['business_projects']['Insert'];
+type BusinessProjectRow = Tables['business_projects']['Row'];
 type DiagnosticInsert = Tables['diagnostics']['Insert'];
 type MissionAnswerInsert = Tables['mission_answers']['Insert'];
 type PersonaInsert = Tables['personas']['Insert'];
@@ -40,12 +41,37 @@ export async function getUserBusinessProjects() {
   return data;
 }
 
+export async function getOrCreateDefaultBusinessProject(): Promise<BusinessProjectRow> {
+  const projects = await getUserBusinessProjects();
+  const activeProject = projects.find((project) => project.status !== 'archived');
+
+  if (activeProject) {
+    return activeProject;
+  }
+
+  return createBusinessProject({
+    name: 'Meu plano de negocio',
+    status: 'in_progress',
+  });
+}
+
 export async function upsertDiagnostic(input: DiagnosticInsert) {
   const { data, error } = await supabase
     .from('diagnostics')
     .upsert(input, { onConflict: 'project_id' })
     .select()
     .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getProjectDiagnostic(projectId: string) {
+  const { data, error } = await supabase
+    .from('diagnostics')
+    .select('*')
+    .eq('project_id', projectId)
+    .maybeSingle();
 
   if (error) throw error;
   return data;

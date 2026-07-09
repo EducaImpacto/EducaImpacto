@@ -8,8 +8,19 @@ import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
 import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
+import { AuthModal } from './components/AuthModal';
 import { DiagnosticData } from './screens/DiagnosticScreen';
 import { isAdequateAnswer } from './utils/answerValidation';
+import { supabase } from './lib/supabase';
+import {
+  getOrCreateDefaultBusinessProject,
+  getProjectDiagnostic,
+  getProjectMissionAnswers,
+  toJson,
+  upsertDiagnostic,
+  upsertMissionAnswer,
+} from './services/backendRepository';
+import type { User } from '@supabase/supabase-js';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 type Screen =
@@ -295,23 +306,14 @@ export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
   const isRestoringHistory = useRef(false);
   const lastHistoryKey = useRef('');
+  const remoteSyncStarted = useRef(false);
   const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
-
-  useEffect(() => {
-    let isMounted = true;
-
-    import('./lib/supabase').then(({ isSupabaseConfigured, supabase }) => {
-      if (!isMounted || !isSupabaseConfigured) return;
-
-      supabase.auth.getSession().catch((error) => {
-        console.warn('Nao foi possivel iniciar sessao do Supabase.', error);
-      });
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authMessage, setAuthMessage] = useState('');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [syncMessage, setSyncMessage] = useState('');
 
   useEffect(() => {
     window.scrollTo({
@@ -331,6 +333,118 @@ export default function App() {
   // Gamificação
   const [xp, setXp] = useState(persistedState?.xp ?? 0);
   const [nivel, setNivel] = useState(persistedState?.nivel ?? 1);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (isMounted) setAuthUser(data.session?.user ?? null);
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user ?? null);
+      if (!session?.user) {
+        setActiveProjectId(null);
+        remoteSyncStarted.current = false;
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!authUser) return;
+
+    let isMounted = true;
+
+    getOrCreateDefaultBusinessProject()
+      .then(async (project) => {
+        if (!isMounted) return;
+
+        setActiveProjectId(project.id);
+
+        const [remoteDiagnostic, remoteAnswers] = await Promise.all([
+          getProjectDiagnostic(project.id),
+          getProjectMissionAnswers(project.id),
+        ]);
+
+        if (!isMounted) return;
+
+        if (!diagnosticData && remoteDiagnostic?.answers && typeof remoteDiagnostic.answers === 'object') {
+          setDiagnosticData({
+            ...(remoteDiagnostic.answers as Partial<DiagnosticData>),
+            nivel: remoteDiagnostic.profile_level,
+          } as DiagnosticData);
+        }
+
+        if (Object.keys(respostas).length === 0 && remoteAnswers.length > 0) {
+          setRespostas(
+            remoteAnswers.reduce<Record<number, string>>((acc, answer) => {
+              acc[answer.mission_id] = answer.answer;
+              return acc;
+            }, {})
+          );
+        }
+
+        remoteSyncStarted.current = true;
+        setSyncMessage('Progresso conectado ao Supabase.');
+      })
+      .catch((error) => {
+        console.error('Nao foi possivel preparar projeto no Supabase.', error);
+        setSyncMessage('Nao foi possivel conectar seu progresso ao Supabase agora.');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authUser]);
+
+  useEffect(() => {
+    if (!activeProjectId || !diagnosticData || !remoteSyncStarted.current) return;
+
+    upsertDiagnostic({
+      project_id: activeProjectId,
+      profile_level: diagnosticData.nivel,
+      answers: toJson(diagnosticData),
+    }).catch((error) => {
+      console.error('Nao foi possivel salvar diagnostico no Supabase.', error);
+      setSyncMessage('Diagnostico salvo localmente. Tentaremos sincronizar depois.');
+    });
+  }, [activeProjectId, diagnosticData]);
+
+  useEffect(() => {
+    if (!activeProjectId || !remoteSyncStarted.current) return;
+
+    const entries = Object.entries(respostas).filter(([, answer]) => isAdequateAnswer(answer));
+    if (entries.length === 0) return;
+
+    Promise.all(
+      entries.map(([missionId, answer]) => {
+        const missionIdNumber = Number(missionId);
+        const etapa = ETAPAS.find((item) => item.missions.some((mission) => mission.id === missionIdNumber));
+        const mission = etapa?.missions.find((item) => item.id === missionIdNumber);
+
+        if (!etapa || !mission) return Promise.resolve();
+
+        return upsertMissionAnswer({
+          project_id: activeProjectId,
+          module_id: etapa.id,
+          module_title: etapa.label,
+          mission_id: mission.id,
+          mission_title: mission.title,
+          question: mission.question,
+          answer,
+          status: 'answered',
+        });
+      })
+    ).catch((error) => {
+      console.error('Nao foi possivel salvar respostas no Supabase.', error);
+      setSyncMessage('Respostas salvas localmente. Tentaremos sincronizar depois.');
+    });
+  }, [activeProjectId, respostas]);
 
   useEffect(() => {
     if (etapaIndex < 0 || etapaIndex >= ETAPAS.length) {
@@ -595,10 +709,83 @@ export default function App() {
     setScreen('mission');
   };
 
+  const handleSignIn = async (email: string, password: string) => {
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setAuthMessage(error.message);
+      setAuthLoading(false);
+      return;
+    }
+
+    setAuthMessage('Entrada realizada. Seu progresso sera sincronizado.');
+    setAuthLoading(false);
+    setIsAuthModalOpen(false);
+  };
+
+  const handleSignUp = async (email: string, password: string, fullName: string) => {
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    });
+
+    if (error) {
+      setAuthMessage(error.message);
+      setAuthLoading(false);
+      return;
+    }
+
+    if (data.session) {
+      setAuthMessage('Conta criada. Seu progresso sera sincronizado.');
+      setIsAuthModalOpen(false);
+    } else {
+      setAuthMessage('Conta criada. Verifique seu e-mail para confirmar o acesso.');
+    }
+
+    setAuthLoading(false);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSyncMessage('');
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
-      <AppHeader onHome={handleGoHome} onOpenModules={handleOpenModules} />
+      <AppHeader
+        onHome={handleGoHome}
+        onOpenModules={handleOpenModules}
+        userEmail={authUser?.email ?? null}
+        onAuthClick={() => setIsAuthModalOpen(true)}
+        onSignOut={handleSignOut}
+      />
+
+      {syncMessage && authUser && (
+        <div className="border-b border-[#dbe9e2] bg-[#f5faf7] px-4 py-2 text-center text-xs font-semibold text-[#052254]">
+          {syncMessage}
+        </div>
+      )}
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        loading={authLoading}
+        message={authMessage}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSignIn={handleSignIn}
+        onSignUp={handleSignUp}
+      />
 
       {screen === 'landing' && (
         <LandingPage onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />

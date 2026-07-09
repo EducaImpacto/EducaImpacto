@@ -1,13 +1,16 @@
 import React from 'react';
-import { Home, LayoutGrid } from 'lucide-react';
+import { Home, LayoutGrid, LogOut, UserRound } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
   onHome: () => void;
   onOpenModules: () => void;
+  userEmail?: string | null;
+  onAuthClick: () => void;
+  onSignOut: () => void;
 }
 
-export function AppHeader({ onHome, onOpenModules }: AppHeaderProps) {
+export function AppHeader({ onHome, onOpenModules, userEmail, onAuthClick, onSignOut }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-[60] border-b border-[#dbe9e2] bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
@@ -38,6 +41,27 @@ export function AppHeader({ onHome, onOpenModules }: AppHeaderProps) {
             <LayoutGrid className="h-4 w-4" />
             <span>Módulos</span>
           </button>
+
+          {userEmail ? (
+            <button
+              type="button"
+              onClick={onSignOut}
+              className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+              title={userEmail}
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sair</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onAuthClick}
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-[#052254] px-3 text-sm font-semibold text-white transition-colors hover:bg-[#06173C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+            >
+              <UserRound className="h-4 w-4" />
+              <span>Entrar</span>
+            </button>
+          )}
         </nav>
       </div>
     </header>
