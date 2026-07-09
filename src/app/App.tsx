@@ -296,7 +296,24 @@ export default function App() {
   const isRestoringHistory = useRef(false);
   const lastHistoryKey = useRef('');
   const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
-    useEffect(() => {
+
+  useEffect(() => {
+    let isMounted = true;
+
+    import('./lib/supabase').then(({ isSupabaseConfigured, supabase }) => {
+      if (!isMounted || !isSupabaseConfigured) return;
+
+      supabase.auth.getSession().catch((error) => {
+        console.warn('Nao foi possivel iniciar sessao do Supabase.', error);
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: 'auto',
