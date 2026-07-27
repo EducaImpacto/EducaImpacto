@@ -19,9 +19,9 @@ export function BrandLogo({ inverted = false, compact = false, className = '' }:
 
   return (
     <img
-      src="/logo-educa-impacto-horizontal.jpeg"
+      src="/logo-educa-impacto-horizontal.png"
       alt="Educa Impacto"
-      className={`h-16 w-auto max-w-[260px] rounded-md object-contain sm:h-20 sm:max-w-[340px] ${inverted ? 'bg-white p-1' : ''} ${className}`}
+      className={`h-[4.5rem] w-auto max-w-[290px] rounded-md object-contain sm:h-[5.5rem] sm:max-w-[370px] ${inverted ? 'bg-white p-1' : ''} ${className}`}
     />
   );
 }
