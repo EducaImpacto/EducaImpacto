@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './Button';
 
 interface AuthModalProps {
   isOpen: boolean;
+  initialMode?: 'signin' | 'signup';
   loading?: boolean;
   message?: string;
   onClose: () => void;
@@ -13,6 +14,7 @@ interface AuthModalProps {
 
 export function AuthModal({
   isOpen,
+  initialMode = 'signin',
   loading = false,
   message,
   onClose,
@@ -23,6 +25,10 @@ export function AuthModal({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+
+  useEffect(() => {
+    if (isOpen) setMode(initialMode);
+  }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
 

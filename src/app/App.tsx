@@ -344,6 +344,16 @@ function buildBusinessPlanModulesSnapshot(
   });
 }
 
+function getAuthErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (/load failed|failed to fetch|network|fetch/i.test(message)) {
+    return 'Nao consegui conectar ao Supabase. Confira se a Project URL esta correta e se o projeto esta ativo.';
+  }
+
+  return message;
+}
+
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
@@ -354,6 +364,7 @@ export default function App() {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState('');
@@ -737,13 +748,14 @@ export default function App() {
   };
 
   const handleGenerateBusinessPlan = async () => {
-    setScreen('business-plan');
-
     if (!authUser || !activeProjectId) {
-      setSyncMessage('Entre na sua conta para salvar o plano no Supabase antes da IA.');
+      setAuthModalMode('signin');
+      setAuthMessage('Entre ou crie uma conta para salvar suas respostas no Supabase e preparar o plano para a IA.');
+      setIsAuthModalOpen(true);
       return;
     }
 
+    setScreen('business-plan');
     setIsPreparingPlan(true);
 
     const modulesSnapshot = buildBusinessPlanModulesSnapshot(respostas);
@@ -818,47 +830,57 @@ export default function App() {
     setAuthLoading(true);
     setAuthMessage('');
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setAuthMessage(error.message);
+      if (error) {
+        setAuthMessage(getAuthErrorMessage(error));
+        setAuthLoading(false);
+        return;
+      }
+
+      setAuthMessage('Entrada realizada. Seu progresso sera sincronizado.');
       setAuthLoading(false);
-      return;
+      setIsAuthModalOpen(false);
+    } catch (error) {
+      setAuthMessage(getAuthErrorMessage(error));
+      setAuthLoading(false);
     }
-
-    setAuthMessage('Entrada realizada. Seu progresso sera sincronizado.');
-    setAuthLoading(false);
-    setIsAuthModalOpen(false);
   };
 
   const handleSignUp = async (email: string, password: string, fullName: string) => {
     setAuthLoading(true);
     setAuthMessage('');
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      setAuthMessage(error.message);
+      if (error) {
+        setAuthMessage(getAuthErrorMessage(error));
+        setAuthLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        setAuthMessage('Conta criada. Seu progresso sera sincronizado.');
+        setIsAuthModalOpen(false);
+      } else {
+        setAuthMessage('Conta criada. Verifique seu e-mail para confirmar o acesso.');
+      }
+
       setAuthLoading(false);
-      return;
+    } catch (error) {
+      setAuthMessage(getAuthErrorMessage(error));
+      setAuthLoading(false);
     }
-
-    if (data.session) {
-      setAuthMessage('Conta criada. Seu progresso sera sincronizado.');
-      setIsAuthModalOpen(false);
-    } else {
-      setAuthMessage('Conta criada. Verifique seu e-mail para confirmar o acesso.');
-    }
-
-    setAuthLoading(false);
   };
 
   const handleSignOut = async () => {
@@ -874,7 +896,11 @@ export default function App() {
         onAbout={handleOpenAbout}
         onOpenModules={handleOpenModules}
         userEmail={authUser?.email ?? null}
-        onAuthClick={() => setIsAuthModalOpen(true)}
+        onAuthClick={() => {
+          setAuthModalMode('signin');
+          setAuthMessage('');
+          setIsAuthModalOpen(true);
+        }}
         onSignOut={handleSignOut}
       />
 
@@ -886,6 +912,7 @@ export default function App() {
 
       <AuthModal
         isOpen={isAuthModalOpen}
+        initialMode={authModalMode}
         loading={authLoading}
         message={authMessage}
         onClose={() => setIsAuthModalOpen(false)}

@@ -106,6 +106,7 @@ export function DashboardScreen({
 
                       <p className="text-[#e5f0ea] mb-6">
                         Você completou todas as missões! A IA vai organizar suas respostas em um plano estruturado.
+                        Para salvar e gerar pelo backend, entre na sua conta.
                       </p>
 
                       <Button
