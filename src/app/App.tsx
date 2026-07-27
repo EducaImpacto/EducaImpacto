@@ -357,6 +357,15 @@ function getAuthErrorMessage(error: unknown) {
   return message;
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
@@ -760,7 +769,214 @@ export default function App() {
   };
 
   const handleDownloadPlan = () => {
-    alert('Em uma implementação completa, o PDF seria gerado aqui pela IA com todas as suas respostas!');
+    const generatedAt = new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date());
+
+    const modulesHtml = ETAPAS.map((etapa) => {
+      const answeredMissions = etapa.missions
+        .map((mission) => ({
+          ...mission,
+          answer: respostas[mission.id],
+        }))
+        .filter((mission) => isAdequateAnswer(mission.answer));
+
+      if (answeredMissions.length === 0) return '';
+
+      return `
+        <section class="module">
+          <div class="module-heading">
+            <span>Módulo ${etapa.id}</span>
+            <strong>${escapeHtml(etapa.label)}</strong>
+          </div>
+          ${answeredMissions
+            .map((mission) => `
+              <article class="answer">
+                <h3>${escapeHtml(mission.title)}</h3>
+                <p class="question">${escapeHtml(mission.question).replace(/\n/g, '<br />')}</p>
+                <p>${escapeHtml(mission.answer).replace(/\n/g, '<br />')}</p>
+              </article>
+            `)
+            .join('')}
+        </section>
+      `;
+    }).join('');
+
+    const planWindow = window.open('', '_blank');
+
+    if (!planWindow) {
+      alert('Nao foi possivel abrir a janela do PDF. Libere pop-ups para baixar o plano.');
+      return;
+    }
+
+    planWindow.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Plano de Negócios Educa Impacto</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              background: #ffffff;
+              color: #06173C;
+              font-family: Arial, Helvetica, sans-serif;
+              line-height: 1.55;
+            }
+            .page {
+              width: 210mm;
+              min-height: 297mm;
+              margin: 0 auto;
+              padding: 22mm 18mm;
+            }
+            header {
+              border-bottom: 4px solid #329314;
+              margin-bottom: 24px;
+              padding-bottom: 18px;
+            }
+            .brand {
+              color: #052254;
+              font-size: 13px;
+              font-weight: 700;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+            }
+            h1 {
+              margin: 8px 0 8px;
+              color: #052254;
+              font-size: 32px;
+              line-height: 1.15;
+            }
+            .subtitle {
+              margin: 0;
+              color: #3b4a5f;
+              font-size: 14px;
+            }
+            .meta {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 10px;
+              margin: 22px 0;
+            }
+            .meta div {
+              border: 1px solid #B2C9BF;
+              border-radius: 10px;
+              padding: 10px;
+            }
+            .meta span {
+              display: block;
+              color: #516176;
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+            }
+            .meta strong {
+              display: block;
+              margin-top: 4px;
+              color: #06173C;
+              font-size: 14px;
+            }
+            .module {
+              break-inside: avoid;
+              margin-top: 20px;
+            }
+            .module-heading {
+              align-items: center;
+              background: linear-gradient(90deg, #052254 0%, #0A5740 55%, #329314 100%);
+              border-radius: 10px;
+              color: #ffffff;
+              display: flex;
+              gap: 12px;
+              padding: 12px 14px;
+            }
+            .module-heading span {
+              font-size: 11px;
+              font-weight: 700;
+              opacity: 0.9;
+              text-transform: uppercase;
+            }
+            .module-heading strong {
+              font-size: 17px;
+            }
+            .answer {
+              border: 1px solid #dbe9e2;
+              border-radius: 10px;
+              margin-top: 10px;
+              padding: 14px;
+            }
+            .answer h3 {
+              color: #052254;
+              font-size: 16px;
+              margin: 0 0 6px;
+            }
+            .question {
+              color: #516176;
+              font-size: 12px;
+              font-weight: 700;
+              margin: 0 0 8px;
+            }
+            .answer p:last-child {
+              margin-bottom: 0;
+            }
+            footer {
+              border-top: 1px solid #dbe9e2;
+              color: #516176;
+              font-size: 11px;
+              margin-top: 28px;
+              padding-top: 12px;
+            }
+            @media print {
+              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+              .page { margin: 0; width: auto; }
+            }
+          </style>
+        </head>
+        <body>
+          <main class="page">
+            <header>
+              <div class="brand">Educa Impacto</div>
+              <h1>Plano de Negócios</h1>
+              <p class="subtitle">Versão MVP gerada a partir das respostas da trilha iniciante.</p>
+            </header>
+
+            <section class="meta">
+              <div>
+                <span>Perfil</span>
+                <strong>${escapeHtml(activeDiagnosticData.nivel)}</strong>
+              </div>
+              <div>
+                <span>Respostas</span>
+                <strong>${businessPlanAnswers.length} de ${TOTAL_MISSIONS}</strong>
+              </div>
+              <div>
+                <span>Gerado em</span>
+                <strong>${escapeHtml(generatedAt)}</strong>
+              </div>
+            </section>
+
+            ${modulesHtml || '<p>Nenhuma resposta adequada foi encontrada para compor o plano.</p>'}
+
+            <footer>
+              Documento gerado pela plataforma Educa Impacto. A versão final com IA poderá complementar, revisar e estruturar este conteúdo.
+            </footer>
+          </main>
+          <script>
+            window.addEventListener('load', () => {
+              window.focus();
+              window.print();
+            });
+          </script>
+        </body>
+      </html>
+    `);
+    planWindow.document.close();
   };
 
   const handleGenerateBusinessPlan = async () => {
