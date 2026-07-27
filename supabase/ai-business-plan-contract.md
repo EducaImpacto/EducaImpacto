@@ -46,14 +46,59 @@ Campos usados agora:
   ],
   "sections": [
     "Sumario Executivo",
-    "Cliente e Mercado",
+    "Descricao do Negocio",
+    "Publico-Alvo e Mercado",
     "Problema e Proposta de Valor",
-    "Operacao",
-    "Custos e Receita",
+    "Plano Operacional",
+    "Marketing e Vendas",
+    "Financeiro Inicial",
+    "Riscos e Mitigacoes",
     "Proximos Passos"
-  ]
+  ],
+  "expectedOutput": {
+    "type": "professional_business_plan",
+    "language": "pt-BR",
+    "tone": "profissional, claro e acessivel",
+    "format": [
+      "executiveSummary",
+      "businessDescription",
+      "targetAudienceAndMarket",
+      "problemAndOpportunity",
+      "solutionAndValueProposition",
+      "operationsPlan",
+      "marketingAndSalesPlan",
+      "financialOverview",
+      "risksAndMitigations",
+      "nextSteps"
+    ]
+  }
 }
 ```
+
+## Saida esperada da IA
+
+A IA nao deve devolver uma lista de perguntas e respostas. Ela deve usar as respostas como insumo e produzir um plano profissional, reescrito, organizado e melhorado.
+
+Formato sugerido para salvar de volta em `business_plans.content.generatedPlan`:
+
+```json
+{
+  "generatedPlan": {
+    "executiveSummary": "Texto profissional do sumario executivo.",
+    "businessDescription": "Texto sobre o negocio, oferta e contexto.",
+    "targetAudienceAndMarket": "Texto sobre publico-alvo e mercado.",
+    "problemAndOpportunity": "Texto sobre problema, dor e oportunidade.",
+    "solutionAndValueProposition": "Texto sobre solucao e proposta de valor.",
+    "operationsPlan": "Texto sobre operacao inicial.",
+    "marketingAndSalesPlan": "Texto sobre canais, aquisicao e vendas.",
+    "financialOverview": "Texto sobre custos, receita e validacoes financeiras.",
+    "risksAndMitigations": "Texto sobre riscos e mitigacoes.",
+    "nextSteps": ["Acao 1", "Acao 2", "Acao 3"]
+  }
+}
+```
+
+Depois de salvar o plano gerado, atualizar `status` para `generated`.
 
 ## Formato atual de `generated_from`
 
@@ -96,5 +141,6 @@ Criar uma Edge Function ou API chamada `generate-business-plan` que:
 ## Observacoes
 
 - A quantidade de perguntas por modulo nao deve ser fixa. Use sempre `totalQuestions` e `moduleQuestionCounts`.
-- A IA deve preservar respostas originais e apenas organizar, complementar e sugerir melhorias.
+- A IA deve preservar o sentido das respostas originais, mas pode reescrever, organizar, complementar e sugerir melhorias.
+- A tela e o PDF devem priorizar o plano profissional gerado, nao as perguntas e respostas brutas.
 - Antes de gerar PDF, o resultado deve ficar salvo no Supabase.

@@ -34,24 +34,49 @@ interface BusinessPlanScreenProps {
 
 const planSections = [
   {
-    title: 'Contexto do Negócio',
+    title: 'Sumário Executivo',
     blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
-    description: 'Síntese inicial do negócio, da motivação do empreendedor e da solução proposta.',
+    description: 'Visão geral do negócio, oportunidade, solução proposta e principais pontos de atenção.',
   },
   {
-    title: 'Cliente',
+    title: 'Descrição do Negócio',
+    blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Operação básica'],
+    description: 'Apresentação do que será oferecido, como o negócio começa e quais recursos já existem.',
+  },
+  {
+    title: 'Público-Alvo e Mercado',
     blocks: ['Cliente e mercado'],
-    description: 'Perfil do cliente, contexto de compra e cenário real onde o problema aparece.',
+    description: 'Perfil de cliente, contexto de compra, canais de acesso e cenário de mercado inicial.',
   },
   {
-    title: 'Problema',
-    blocks: ['Problema'],
-    description: 'Dor principal do cliente, frequência e impacto do problema no dia a dia.',
+    title: 'Problema e Oportunidade',
+    blocks: ['Problema', 'Cliente e mercado'],
+    description: 'Dor principal do cliente e oportunidade que justifica a existência do negócio.',
   },
   {
-    title: 'Solução e Viabilidade',
-    blocks: ['Proposta de valor', 'Operação básica', 'Custos', 'Receita'],
-    description: 'Solução proposta, operação inicial, custos para começar e modelo de receita.',
+    title: 'Solução e Proposta de Valor',
+    blocks: ['Proposta de valor', 'Produto / Serviço'],
+    description: 'Como a solução responde ao problema e por que ela pode ser relevante para o cliente.',
+  },
+  {
+    title: 'Operação',
+    blocks: ['Operação básica'],
+    description: 'Primeiros processos, recursos, estrutura necessária e forma de entrega.',
+  },
+  {
+    title: 'Marketing e Vendas',
+    blocks: ['Canais de venda e aquisição', 'Cliente e mercado', 'Crescimento'],
+    description: 'Canais para encontrar clientes, comunicar a oferta e iniciar as primeiras vendas.',
+  },
+  {
+    title: 'Financeiro Inicial',
+    blocks: ['Custos', 'Receita'],
+    description: 'Principais custos, fontes de receita e pontos que precisam de validação financeira.',
+  },
+  {
+    title: 'Riscos e Próximos Passos',
+    blocks: ['Crescimento', 'Custos', 'Operação básica'],
+    description: 'Incertezas, validações pendentes e ações recomendadas para evoluir o negócio.',
   },
 ];
 
@@ -60,6 +85,20 @@ const profileLabels: Record<ProfileType, string> = {
   intermediario: 'Intermediário',
   avancado: 'Avançado',
 };
+
+function buildProfessionalDraft(sectionTitle: string, description: string, answers: MissionAnswer[]) {
+  if (answers.length === 0) {
+    return 'Esta seção será consolidada pela IA assim que houver informações suficientes para análise.';
+  }
+
+  const sourceText = answers
+    .slice(0, 3)
+    .map((answer) => answer.answer.trim())
+    .filter(Boolean)
+    .join(' ');
+
+  return `${description} Com base nas informações fornecidas, esta seção deve considerar: ${sourceText}`;
+}
 
 export function BusinessPlanScreen({
   diagnosticData,
@@ -76,17 +115,18 @@ export function BusinessPlanScreen({
 
   const answersBySection = useMemo(() => {
     return planSections.map((section) => {
-      const target = moduleAnswerTargets.find((module) => module.title === section.title);
-      const sectionAnswers = answers.filter((answer) => answer.moduleTitle === section.title);
+      const sectionAnswers = answers.filter((answer) =>
+        answer.planBlocks.some((block) => section.blocks.includes(block))
+      );
 
       return {
         ...section,
-        moduleId: target?.moduleId,
-        totalAnswers: target?.total ?? sectionAnswers.length,
+        totalAnswers: sectionAnswers.length,
         answers: sectionAnswers,
+        draft: buildProfessionalDraft(section.title, section.description, sectionAnswers),
       };
     });
-  }, [answers, moduleAnswerTargets]);
+  }, [answers]);
 
   const activeSection = answersBySection[activeSectionIndex] ?? answersBySection[0];
   const activeSectionAnswerCount = activeSection?.answers.length ?? 0;
@@ -143,25 +183,25 @@ export function BusinessPlanScreen({
           <div className="p-8">
             <div className="grid lg:grid-cols-[1fr_320px] gap-8 mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Prévia estruturada do plano</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Plano profissional estruturado</h2>
                 <p className="text-gray-600 mb-6">
-                  Esta versão MVP usa as respostas da trilha iniciante para montar a base do plano de negócios.
-                  Na integração final, esse conteúdo será refinado e exportado em PDF.
+                  Esta versão prepara a estrutura oficial que a IA deverá preencher e refinar. Por enquanto,
+                  o texto usa suas respostas como base de rascunho para validar o formato do plano.
                 </p>
 
                 <div className="mb-5 rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur-sm">
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                        Módulos da trilha
+                        Seções do plano
                       </p>
                       <p className="text-sm text-gray-600">
                         Mostrando {activeSectionIndex + 1} de {answersBySection.length}
                       </p>
                     </div>
                     <div className="text-right text-xs text-gray-500">
-                      <div className="font-semibold text-gray-700">{activeSectionAnswerCount} respostas</div>
-                      <div>do módulo atual</div>
+                      <div className="font-semibold text-gray-700">{activeSectionAnswerCount} insumos</div>
+                      <div>da seção atual</div>
                     </div>
                   </div>
 
@@ -183,7 +223,7 @@ export function BusinessPlanScreen({
                         >
                           <div className="text-sm font-bold">{section.title}</div>
                           <div className={`mt-1 text-xs ${isActive ? 'text-[#e5f0ea]' : 'text-gray-500'}`}>
-                            {section.answers.length}/{section.totalAnswers} respostas{isComplete ? ' concluído' : ''}
+                            {section.answers.length} insumos{isComplete ? ' mapeados' : ''}
                           </div>
                         </button>
                       );
@@ -206,7 +246,14 @@ export function BusinessPlanScreen({
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="rounded-xl bg-[#f5faf7] p-4 text-sm leading-7 text-gray-700">
+                      {activeSection.draft}
+                    </div>
+
+                    <div className="mt-5 space-y-3">
+                      <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
+                        Insumos usados nesta seção
+                      </p>
                       {activeSection.answers.map((answer) => (
                         <div key={`${activeSection.title}-${answer.missionId}`} className="bg-gray-50 rounded-xl p-4">
                           <div className="flex items-start justify-between gap-3 mb-1">
@@ -226,7 +273,7 @@ export function BusinessPlanScreen({
                         </div>
                       ))}
                       {activeSection.answers.length === 0 && (
-                        <p className="text-sm text-gray-500">Sem respostas vinculadas a este módulo.</p>
+                        <p className="text-sm text-gray-500">Sem respostas vinculadas a esta seção.</p>
                       )}
                     </div>
 
@@ -237,7 +284,7 @@ export function BusinessPlanScreen({
                         onClick={() => setActiveSectionIndex((current) => Math.max(0, current - 1))}
                         disabled={activeSectionIndex === 0}
                       >
-                        Módulo anterior
+                        Seção anterior
                       </Button>
 
                       <Button
@@ -246,7 +293,7 @@ export function BusinessPlanScreen({
                         onClick={() => setActiveSectionIndex((current) => Math.min(answersBySection.length - 1, current + 1))}
                         disabled={activeSectionIndex === answersBySection.length - 1}
                       >
-                        Próximo módulo
+                        Próxima seção
                       </Button>
                     </div>
                   </div>
@@ -258,10 +305,11 @@ export function BusinessPlanScreen({
                   <h3 className="font-bold text-[#06173C] mb-3">Estrutura contemplada</h3>
                   <div className="space-y-2 text-sm text-[#06173C]">
                     {[
-                      'Contexto do Negócio',
-                      'Cliente',
-                      'Problema',
-                      'Solução e Viabilidade',
+                      'Sumário Executivo',
+                      'Mercado',
+                      'Operação',
+                      'Financeiro',
+                      'Riscos',
                     ].map((item) => (
                       <div key={item} className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-[#329314]" />

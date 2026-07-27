@@ -777,31 +777,76 @@ export default function App() {
       minute: '2-digit',
     }).format(new Date());
 
-    const modulesHtml = ETAPAS.map((etapa) => {
-      const answeredMissions = etapa.missions
-        .map((mission) => ({
-          ...mission,
-          answer: respostas[mission.id],
-        }))
-        .filter((mission) => isAdequateAnswer(mission.answer));
+    const professionalSections = [
+      {
+        title: '1. Sumário Executivo',
+        blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
+        description: 'Síntese objetiva do negócio, da oportunidade identificada e da solução proposta.',
+      },
+      {
+        title: '2. Descrição do Negócio',
+        blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Operação básica'],
+        description: 'Apresentação do que será oferecido, como o negócio começa e quais recursos já existem.',
+      },
+      {
+        title: '3. Público-Alvo e Mercado',
+        blocks: ['Cliente e mercado', 'Canais de venda e aquisição'],
+        description: 'Perfil do cliente, contexto de compra, canais de acesso e mercado inicial.',
+      },
+      {
+        title: '4. Problema e Oportunidade',
+        blocks: ['Problema', 'Cliente e mercado'],
+        description: 'Dor principal do cliente e oportunidade que justifica a existência do negócio.',
+      },
+      {
+        title: '5. Solução e Proposta de Valor',
+        blocks: ['Proposta de valor', 'Produto / Serviço'],
+        description: 'Como a solução responde ao problema e por que ela pode ser relevante para o cliente.',
+      },
+      {
+        title: '6. Plano Operacional',
+        blocks: ['Operação básica'],
+        description: 'Primeiros processos, recursos, estrutura necessária e forma de entrega.',
+      },
+      {
+        title: '7. Marketing e Vendas',
+        blocks: ['Canais de venda e aquisição', 'Cliente e mercado', 'Crescimento'],
+        description: 'Canais para encontrar clientes, comunicar a oferta e iniciar as primeiras vendas.',
+      },
+      {
+        title: '8. Financeiro Inicial',
+        blocks: ['Custos', 'Receita'],
+        description: 'Principais custos, fontes de receita e pontos que precisam de validação financeira.',
+      },
+      {
+        title: '9. Riscos e Próximos Passos',
+        blocks: ['Crescimento', 'Custos', 'Operação básica'],
+        description: 'Incertezas, validações pendentes e ações recomendadas para evoluir o negócio.',
+      },
+    ];
 
-      if (answeredMissions.length === 0) return '';
+    const sectionsHtml = professionalSections.map((section) => {
+      const sectionAnswers = businessPlanAnswers.filter((answer) =>
+        answer.planBlocks.some((block) => section.blocks.includes(block))
+      );
+
+      const sourceText = sectionAnswers
+        .slice(0, 4)
+        .map((answer) => answer.answer.trim())
+        .filter(Boolean)
+        .join(' ');
+
+      const sectionDraft = sourceText
+        ? `${section.description} Com base nas informações fornecidas, o plano deve considerar: ${sourceText}`
+        : 'Esta seção será consolidada pela IA assim que houver informações suficientes para análise.';
 
       return `
-        <section class="module">
-          <div class="module-heading">
-            <span>Módulo ${etapa.id}</span>
-            <strong>${escapeHtml(etapa.label)}</strong>
+        <section class="plan-section">
+          <div class="section-heading">
+            <strong>${escapeHtml(section.title)}</strong>
+            <span>${sectionAnswers.length} insumos mapeados</span>
           </div>
-          ${answeredMissions
-            .map((mission) => `
-              <article class="answer">
-                <h3>${escapeHtml(mission.title)}</h3>
-                <p class="question">${escapeHtml(mission.question).replace(/\n/g, '<br />')}</p>
-                <p>${escapeHtml(mission.answer).replace(/\n/g, '<br />')}</p>
-              </article>
-            `)
-            .join('')}
+          <p>${escapeHtml(sectionDraft).replace(/\n/g, '<br />')}</p>
         </section>
       `;
     }).join('');
@@ -883,47 +928,34 @@ export default function App() {
               color: #06173C;
               font-size: 14px;
             }
-            .module {
+            .plan-section {
               break-inside: avoid;
               margin-top: 20px;
             }
-            .module-heading {
+            .section-heading {
               align-items: center;
               background: linear-gradient(90deg, #052254 0%, #0A5740 55%, #329314 100%);
               border-radius: 10px;
               color: #ffffff;
               display: flex;
+              justify-content: space-between;
               gap: 12px;
               padding: 12px 14px;
             }
-            .module-heading span {
+            .section-heading span {
               font-size: 11px;
               font-weight: 700;
               opacity: 0.9;
               text-transform: uppercase;
             }
-            .module-heading strong {
+            .section-heading strong {
               font-size: 17px;
             }
-            .answer {
+            .plan-section p {
               border: 1px solid #dbe9e2;
               border-radius: 10px;
               margin-top: 10px;
               padding: 14px;
-            }
-            .answer h3 {
-              color: #052254;
-              font-size: 16px;
-              margin: 0 0 6px;
-            }
-            .question {
-              color: #516176;
-              font-size: 12px;
-              font-weight: 700;
-              margin: 0 0 8px;
-            }
-            .answer p:last-child {
-              margin-bottom: 0;
             }
             footer {
               border-top: 1px solid #dbe9e2;
@@ -943,7 +975,7 @@ export default function App() {
             <header>
               <div class="brand">Educa Impacto</div>
               <h1>Plano de Negócios</h1>
-              <p class="subtitle">Versão MVP gerada a partir das respostas da trilha iniciante.</p>
+              <p class="subtitle">Estrutura profissional preparada a partir das respostas da trilha iniciante.</p>
             </header>
 
             <section class="meta">
@@ -961,7 +993,7 @@ export default function App() {
               </div>
             </section>
 
-            ${modulesHtml || '<p>Nenhuma resposta adequada foi encontrada para compor o plano.</p>'}
+            ${sectionsHtml || '<p>Nenhuma resposta adequada foi encontrada para compor o plano.</p>'}
 
             <footer>
               Documento gerado pela plataforma Educa Impacto. A versão final com IA poderá complementar, revisar e estruturar este conteúdo.
@@ -1004,12 +1036,32 @@ export default function App() {
           modules: modulesSnapshot,
           sections: [
             'Sumario Executivo',
-            'Cliente e Mercado',
+            'Descricao do Negocio',
+            'Publico-Alvo e Mercado',
             'Problema e Proposta de Valor',
-            'Operacao',
-            'Custos e Receita',
+            'Plano Operacional',
+            'Marketing e Vendas',
+            'Financeiro Inicial',
+            'Riscos e Mitigacoes',
             'Proximos Passos',
           ],
+          expectedOutput: {
+            type: 'professional_business_plan',
+            language: 'pt-BR',
+            tone: 'profissional, claro e acessivel',
+            format: [
+              'executiveSummary',
+              'businessDescription',
+              'targetAudienceAndMarket',
+              'problemAndOpportunity',
+              'solutionAndValueProposition',
+              'operationsPlan',
+              'marketingAndSalesPlan',
+              'financialOverview',
+              'risksAndMitigations',
+              'nextSteps',
+            ],
+          },
         }),
         generated_from: toJson({
           source: 'educa-impacto-web',
