@@ -3,5 +3,6 @@
 @import './theme.css';
 
 #root {
+  --app-build-marker: 20260727;
   min-height: 100vh;
 }

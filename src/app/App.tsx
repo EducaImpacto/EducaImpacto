@@ -252,6 +252,7 @@ const ETAPAS: Etapa[] = [
 
 const TOTAL_MISSIONS = ETAPAS.reduce((acc, e) => acc + e.missions.length, 0); // 20
 const STORAGE_KEY = 'educa-impacto-progress-v1';
+const APP_BUILD_MARKER = '2026-07-27-plan-history-cache-fix';
 
 const DEFAULT_DIAGNOSTIC_DATA: DiagnosticData = {
   objetivo: 'primeiro-negocio',
@@ -916,7 +917,7 @@ export default function App() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" data-build={APP_BUILD_MARKER}>
       <AppHeader
         onHome={handleGoHome}
         onAbout={handleOpenAbout}
