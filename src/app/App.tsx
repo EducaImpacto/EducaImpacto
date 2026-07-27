@@ -252,7 +252,7 @@ const ETAPAS: Etapa[] = [
 
 const TOTAL_MISSIONS = ETAPAS.reduce((acc, e) => acc + e.missions.length, 0); // 20
 const STORAGE_KEY = 'educa-impacto-progress-v1';
-const APP_BUILD_MARKER = '2026-07-27-plan-history-cache-fix';
+const APP_BUILD_MARKER = '2026-07-27-plan-history-cache-fix-2';
 
 const DEFAULT_DIAGNOSTIC_DATA: DiagnosticData = {
   objetivo: 'primeiro-negocio',
