@@ -6,6 +6,14 @@ import { ProgressBar } from '../components/ProgressBar';
 import { BarChart3, FileDown, History, Sparkles } from 'lucide-react';
 import type { Module } from '../App';
 
+export interface BusinessPlanHistoryItem {
+  id: string;
+  version: number;
+  title: string;
+  status: string;
+  createdAt: string;
+}
+
 interface DashboardScreenProps {
   level: number;
   xp: number;
@@ -15,6 +23,7 @@ interface DashboardScreenProps {
   totalMissions: number;
   completedMissions: number;
   canGeneratePlan: boolean;
+  businessPlanHistory: BusinessPlanHistoryItem[];
   onModuleClick: (moduleId: number) => void;
   onGeneratePlan: () => void;
 }
@@ -28,11 +37,18 @@ export function DashboardScreen({
   totalMissions,
   completedMissions,
   canGeneratePlan,
+  businessPlanHistory,
   onModuleClick,
   onGeneratePlan,
 }: DashboardScreenProps) {
   const completedModules = modules.filter((module) => module.completed).length;
   const nextModule = modules.find((module) => !module.completed && !module.locked);
+  const statusLabels: Record<string, string> = {
+    draft: 'Preparado',
+    generated: 'Gerado',
+    approved: 'Aprovado',
+    archived: 'Arquivado',
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] to-[#f5faf7]">
@@ -166,11 +182,38 @@ export function DashboardScreen({
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <History className="w-5 h-5 text-gray-600" />
-                <h3 className="font-bold text-gray-900">Histórico de Downloads</h3>
+                <h3 className="font-bold text-gray-900">Planos salvos</h3>
               </div>
-              <p className="text-sm text-gray-500 text-center py-8">
-                Nenhum download realizado ainda
-              </p>
+              {businessPlanHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {businessPlanHistory.slice(0, 4).map((plan) => (
+                    <div key={plan.id} className="rounded-xl border border-gray-100 bg-[#f5faf7] p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-bold text-[#06173C]">Versão {plan.version}</div>
+                          <div className="text-xs text-gray-500">{plan.title}</div>
+                        </div>
+                        <span className="rounded-full bg-white px-2 py-1 text-[11px] font-bold text-[#329314]">
+                          {statusLabels[plan.status] ?? plan.status}
+                        </span>
+                      </div>
+                      <div className="mt-2 text-xs text-gray-500">
+                        {new Intl.DateTimeFormat('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).format(new Date(plan.createdAt))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-8">
+                  Nenhum plano salvo ainda
+                </p>
+              )}
             </div>
 
             <div className="bg-gradient-to-br from-[#e5f0ea] to-[#e5f0ea] rounded-2xl p-6 border-2 border-[#B2C9BF]">

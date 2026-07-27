@@ -7,6 +7,7 @@ import { MissionScreen } from './screens/MissionScreen';
 import { ModuleCompletedScreen } from './screens/ModuleCompletedScreen';
 import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
+import type { BusinessPlanHistoryItem } from './screens/DashboardScreen';
 import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import { AuthModal } from './components/AuthModal';
@@ -16,6 +17,7 @@ import { supabase } from './lib/supabase';
 import {
   createBusinessPlanSnapshot,
   getOrCreateDefaultBusinessProject,
+  getProjectBusinessPlans,
   getProjectDiagnostic,
   getProjectMissionAnswers,
   toJson,
@@ -369,6 +371,7 @@ export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState('');
   const [isPreparingPlan, setIsPreparingPlan] = useState(false);
+  const [businessPlanHistory, setBusinessPlanHistory] = useState<BusinessPlanHistoryItem[]>([]);
 
   useEffect(() => {
     window.scrollTo({
@@ -400,6 +403,7 @@ export default function App() {
       setAuthUser(session?.user ?? null);
       if (!session?.user) {
         setActiveProjectId(null);
+        setBusinessPlanHistory([]);
         remoteSyncStarted.current = false;
       }
     });
@@ -421,9 +425,10 @@ export default function App() {
 
         setActiveProjectId(project.id);
 
-        const [remoteDiagnostic, remoteAnswers] = await Promise.all([
+        const [remoteDiagnostic, remoteAnswers, remotePlans] = await Promise.all([
           getProjectDiagnostic(project.id),
           getProjectMissionAnswers(project.id),
+          getProjectBusinessPlans(project.id),
         ]);
 
         if (!isMounted) return;
@@ -443,6 +448,16 @@ export default function App() {
             }, {})
           );
         }
+
+        setBusinessPlanHistory(
+          remotePlans.map((plan) => ({
+            id: plan.id,
+            version: plan.version,
+            title: plan.title,
+            status: plan.status,
+            createdAt: plan.created_at,
+          }))
+        );
 
         remoteSyncStarted.current = true;
         setSyncMessage('Progresso conectado ao Supabase.');
@@ -762,7 +777,7 @@ export default function App() {
     const answeredQuestions = modulesSnapshot.reduce((total, module) => total + module.answeredQuestions, 0);
 
     try {
-      await createBusinessPlanSnapshot({
+      const savedPlan = await createBusinessPlanSnapshot({
         project_id: activeProjectId,
         title: 'Plano de negocios Educa Impacto',
         status: 'draft',
@@ -793,6 +808,17 @@ export default function App() {
           })),
         }),
       });
+
+      setBusinessPlanHistory((current) => [
+        {
+          id: savedPlan.id,
+          version: savedPlan.version,
+          title: savedPlan.title,
+          status: savedPlan.status,
+          createdAt: savedPlan.created_at,
+        },
+        ...current.filter((plan) => plan.id !== savedPlan.id),
+      ]);
 
       setSyncMessage('Plano preparado no Supabase para a integracao com IA.');
     } catch (error) {
@@ -957,6 +983,7 @@ export default function App() {
           totalMissions={TOTAL_MISSIONS}
           completedMissions={completedMissionCount}
           canGeneratePlan={completedMissionCount === TOTAL_MISSIONS}
+          businessPlanHistory={businessPlanHistory}
           onModuleClick={handleModuleClick}
           onGeneratePlan={handleGenerateBusinessPlan}
         />

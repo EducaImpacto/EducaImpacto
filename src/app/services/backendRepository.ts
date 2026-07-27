@@ -10,6 +10,9 @@ type PersonaInsert = Tables['personas']['Insert'];
 type ChatSessionInsert = Tables['chat_sessions']['Insert'];
 type ChatMessageInsert = Tables['chat_messages']['Insert'];
 type BusinessPlanInsert = Tables['business_plans']['Insert'];
+type BusinessPlanRow = Tables['business_plans']['Row'];
+
+export type { BusinessPlanRow };
 
 export async function getCurrentUser() {
   const { data, error } = await supabase.auth.getUser();
@@ -150,6 +153,17 @@ export async function createBusinessPlan(input: BusinessPlanInsert) {
     .insert(input)
     .select()
     .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getProjectBusinessPlans(projectId: string) {
+  const { data, error } = await supabase
+    .from('business_plans')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('version', { ascending: false });
 
   if (error) throw error;
   return data;
