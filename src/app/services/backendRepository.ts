@@ -155,6 +155,30 @@ export async function createBusinessPlan(input: BusinessPlanInsert) {
   return data;
 }
 
+export async function getNextBusinessPlanVersion(projectId: string) {
+  const { data, error } = await supabase
+    .from('business_plans')
+    .select('version')
+    .eq('project_id', projectId)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return (data?.version ?? 0) + 1;
+}
+
+export async function createBusinessPlanSnapshot(
+  input: Omit<BusinessPlanInsert, 'version'> & { version?: number }
+) {
+  const version = input.version ?? (await getNextBusinessPlanVersion(input.project_id));
+
+  return createBusinessPlan({
+    ...input,
+    version,
+  });
+}
+
 export function toJson<T>(value: T): Json {
   return value as Json;
 }

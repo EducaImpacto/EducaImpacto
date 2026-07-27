@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LandingPage } from './screens/LandingPage';
+import { AboutScreen } from './screens/AboutScreen';
 import { DiagnosticScreen } from './screens/DiagnosticScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { MissionScreen } from './screens/MissionScreen';
@@ -13,6 +14,7 @@ import { DiagnosticData } from './screens/DiagnosticScreen';
 import { isAdequateAnswer } from './utils/answerValidation';
 import { supabase } from './lib/supabase';
 import {
+  createBusinessPlanSnapshot,
   getOrCreateDefaultBusinessProject,
   getProjectDiagnostic,
   getProjectMissionAnswers,
@@ -25,6 +27,7 @@ import type { User } from '@supabase/supabase-js';
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 type Screen =
   | 'landing'
+  | 'about'
   | 'diagnostic'
   | 'onboarding'
   | 'dashboard'
@@ -275,6 +278,22 @@ interface NavigationState {
   editReturnScreen: EditReturnScreen;
 }
 
+interface BusinessPlanMissionSnapshot {
+  missionId: number;
+  missionTitle: string;
+  question: string;
+  answer: string;
+  planBlocks: string[];
+}
+
+interface BusinessPlanModuleSnapshot {
+  moduleId: number;
+  moduleTitle: string;
+  totalQuestions: number;
+  answeredQuestions: number;
+  missions: BusinessPlanMissionSnapshot[];
+}
+
 function readPersistedState(): Partial<PersistedState> | null {
   if (typeof window === 'undefined') return null;
 
@@ -301,6 +320,30 @@ function getPlanBlocksByEtapa(etapa: number): string[] {
   }
 }
 
+function buildBusinessPlanModulesSnapshot(
+  respostas: Record<number, string>
+): BusinessPlanModuleSnapshot[] {
+  return ETAPAS.map((etapa) => {
+    const missions = etapa.missions
+      .map((mission) => ({
+        missionId: mission.id,
+        missionTitle: mission.title,
+        question: mission.question,
+        answer: respostas[mission.id],
+        planBlocks: getPlanBlocksByEtapa(etapa.id),
+      }))
+      .filter((mission) => isAdequateAnswer(mission.answer));
+
+    return {
+      moduleId: etapa.id,
+      moduleTitle: etapa.label,
+      totalQuestions: etapa.missions.length,
+      answeredQuestions: missions.length,
+      missions,
+    };
+  });
+}
+
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
@@ -314,6 +357,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState('');
+  const [isPreparingPlan, setIsPreparingPlan] = useState(false);
 
   useEffect(() => {
     window.scrollTo({
@@ -602,6 +646,12 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  const handleOpenAbout = () => {
+    setEditingMissionId(null);
+    setScreen('about');
+    window.scrollTo(0, 0);
+  };
+
   const handleStartTrail = () => {
     setEtapaIndex(0);
     setMissaoIndex(0);
@@ -686,6 +736,61 @@ export default function App() {
     alert('Em uma implementação completa, o PDF seria gerado aqui pela IA com todas as suas respostas!');
   };
 
+  const handleGenerateBusinessPlan = async () => {
+    setScreen('business-plan');
+
+    if (!authUser || !activeProjectId) {
+      setSyncMessage('Entre na sua conta para salvar o plano no Supabase antes da IA.');
+      return;
+    }
+
+    setIsPreparingPlan(true);
+
+    const modulesSnapshot = buildBusinessPlanModulesSnapshot(respostas);
+    const answeredQuestions = modulesSnapshot.reduce((total, module) => total + module.answeredQuestions, 0);
+
+    try {
+      await createBusinessPlanSnapshot({
+        project_id: activeProjectId,
+        title: 'Plano de negocios Educa Impacto',
+        status: 'draft',
+        content: toJson({
+          format: 'educa-impacto-business-plan-v1',
+          profile: activeDiagnosticData.nivel,
+          modules: modulesSnapshot,
+          sections: [
+            'Sumario Executivo',
+            'Cliente e Mercado',
+            'Problema e Proposta de Valor',
+            'Operacao',
+            'Custos e Receita',
+            'Proximos Passos',
+          ],
+        }),
+        generated_from: toJson({
+          source: 'educa-impacto-web',
+          generatedAt: new Date().toISOString(),
+          projectId: activeProjectId,
+          diagnostic: activeDiagnosticData,
+          totalQuestions: TOTAL_MISSIONS,
+          answeredQuestions,
+          moduleQuestionCounts: ETAPAS.map((etapa) => ({
+            moduleId: etapa.id,
+            title: etapa.label,
+            total: etapa.missions.length,
+          })),
+        }),
+      });
+
+      setSyncMessage('Plano preparado no Supabase para a integracao com IA.');
+    } catch (error) {
+      console.error('Nao foi possivel preparar o plano para IA.', error);
+      setSyncMessage('Previa aberta. Nao foi possivel salvar o plano no Supabase agora.');
+    } finally {
+      setIsPreparingPlan(false);
+    }
+  };
+
   const handleEditAnswer = (missionId: string, returnScreen: EditReturnScreen) => {
     const missionIdNumber = Number(missionId);
     if (Number.isNaN(missionIdNumber)) return;
@@ -766,15 +871,16 @@ export default function App() {
     <div className="min-h-screen">
       <AppHeader
         onHome={handleGoHome}
+        onAbout={handleOpenAbout}
         onOpenModules={handleOpenModules}
         userEmail={authUser?.email ?? null}
         onAuthClick={() => setIsAuthModalOpen(true)}
         onSignOut={handleSignOut}
       />
 
-      {syncMessage && authUser && (
+      {(syncMessage || isPreparingPlan) && (
         <div className="border-b border-[#dbe9e2] bg-[#f5faf7] px-4 py-2 text-center text-xs font-semibold text-[#052254]">
-          {syncMessage}
+          {isPreparingPlan ? 'Preparando plano no Supabase para a IA...' : syncMessage}
         </div>
       )}
 
@@ -789,6 +895,10 @@ export default function App() {
 
       {screen === 'landing' && (
         <LandingPage onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />
+      )}
+
+      {screen === 'about' && (
+        <AboutScreen onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />
       )}
 
       {screen === 'diagnostic' && (
@@ -821,7 +931,7 @@ export default function App() {
           completedMissions={completedMissionCount}
           canGeneratePlan={completedMissionCount === TOTAL_MISSIONS}
           onModuleClick={handleModuleClick}
-          onGeneratePlan={() => setScreen('business-plan')}
+          onGeneratePlan={handleGenerateBusinessPlan}
         />
       )}
 

@@ -1,16 +1,17 @@
 import React from 'react';
-import { Home, LayoutGrid, LogOut, UserRound } from 'lucide-react';
+import { Home, Info, LayoutGrid, LogOut, UserRound } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
   onHome: () => void;
+  onAbout: () => void;
   onOpenModules: () => void;
   userEmail?: string | null;
   onAuthClick: () => void;
   onSignOut: () => void;
 }
 
-export function AppHeader({ onHome, onOpenModules, userEmail, onAuthClick, onSignOut }: AppHeaderProps) {
+export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthClick, onSignOut }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-[60] border-b border-[#dbe9e2] bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
@@ -31,6 +32,15 @@ export function AppHeader({ onHome, onOpenModules, userEmail, onAuthClick, onSig
           >
             <Home className="h-4 w-4" />
             <span>Home</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onAbout}
+            className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+          >
+            <Info className="h-4 w-4" />
+            <span>Quem somos</span>
           </button>
 
           <button
