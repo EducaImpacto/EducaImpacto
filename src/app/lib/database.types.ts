@@ -210,7 +210,7 @@ export interface Database {
           title: string;
           content: Json;
           generated_from: Json;
-          status: 'draft' | 'generated' | 'approved' | 'archived';
+          status: 'draft' | 'generated' | 'approved' | 'archived' | 'failed';
           created_at: string;
           updated_at: string;
         };

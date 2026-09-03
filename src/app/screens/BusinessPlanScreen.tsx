@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
-import { CheckCircle2, Edit, FileDown, MessageSquare, Share2, Star } from 'lucide-react';
+import { CheckCircle2, Edit, FileDown, Loader2, MessageSquare, Share2, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { DiagnosticData } from './DiagnosticScreen';
 
@@ -22,6 +22,22 @@ interface ModuleAnswerTarget {
   total: number;
 }
 
+/** Espelha `business_plans.content.generatedPlan` gravado pelo agente de IA. */
+export interface GeneratedBusinessPlanContent {
+  executiveSummary: string;
+  businessDescription: string;
+  targetAudienceAndMarket: string;
+  problemAndOpportunity: string;
+  solutionAndValueProposition: string;
+  operationsPlan: string;
+  marketingAndSalesPlan: string;
+  financialOverview: string;
+  risksAndMitigations: string;
+  nextSteps: string[];
+}
+
+export type BusinessPlanGenerationStatus = 'idle' | 'polling' | 'generated' | 'failed' | 'timeout';
+
 interface BusinessPlanScreenProps {
   diagnosticData: DiagnosticData;
   answers: MissionAnswer[];
@@ -30,6 +46,8 @@ interface BusinessPlanScreenProps {
   onEditAnswer: (missionId: string) => void;
   onShare: () => void;
   onBackToDashboard: () => void;
+  generationStatus?: BusinessPlanGenerationStatus;
+  generatedPlan?: GeneratedBusinessPlanContent;
 }
 
 const planSections = [
@@ -37,46 +55,55 @@ const planSections = [
     title: 'Sumário Executivo',
     blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
     description: 'Visão geral do negócio, oportunidade, solução proposta e principais pontos de atenção.',
+    generatedField: 'executiveSummary' as const,
   },
   {
     title: 'Descrição do Negócio',
     blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Operação básica'],
     description: 'Apresentação do que será oferecido, como o negócio começa e quais recursos já existem.',
+    generatedField: 'businessDescription' as const,
   },
   {
     title: 'Público-Alvo e Mercado',
     blocks: ['Cliente e mercado'],
     description: 'Perfil de cliente, contexto de compra, canais de acesso e cenário de mercado inicial.',
+    generatedField: 'targetAudienceAndMarket' as const,
   },
   {
     title: 'Problema e Oportunidade',
     blocks: ['Problema', 'Cliente e mercado'],
     description: 'Dor principal do cliente e oportunidade que justifica a existência do negócio.',
+    generatedField: 'problemAndOpportunity' as const,
   },
   {
     title: 'Solução e Proposta de Valor',
     blocks: ['Proposta de valor', 'Produto / Serviço'],
     description: 'Como a solução responde ao problema e por que ela pode ser relevante para o cliente.',
+    generatedField: 'solutionAndValueProposition' as const,
   },
   {
     title: 'Operação',
     blocks: ['Operação básica'],
     description: 'Primeiros processos, recursos, estrutura necessária e forma de entrega.',
+    generatedField: 'operationsPlan' as const,
   },
   {
     title: 'Marketing e Vendas',
     blocks: ['Canais de venda e aquisição', 'Cliente e mercado', 'Crescimento'],
     description: 'Canais para encontrar clientes, comunicar a oferta e iniciar as primeiras vendas.',
+    generatedField: 'marketingAndSalesPlan' as const,
   },
   {
     title: 'Financeiro Inicial',
     blocks: ['Custos', 'Receita'],
     description: 'Principais custos, fontes de receita e pontos que precisam de validação financeira.',
+    generatedField: 'financialOverview' as const,
   },
   {
     title: 'Riscos e Próximos Passos',
     blocks: ['Crescimento', 'Custos', 'Operação básica'],
     description: 'Incertezas, validações pendentes e ações recomendadas para evoluir o negócio.',
+    generatedField: 'risksAndMitigations' as const,
   },
 ];
 
@@ -108,6 +135,8 @@ export function BusinessPlanScreen({
   onEditAnswer,
   onShare,
   onBackToDashboard,
+  generationStatus = 'idle',
+  generatedPlan,
 }: BusinessPlanScreenProps) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -118,15 +147,17 @@ export function BusinessPlanScreen({
       const sectionAnswers = answers.filter((answer) =>
         answer.planBlocks.some((block) => section.blocks.includes(block))
       );
+      const generatedText = generatedPlan?.[section.generatedField];
 
       return {
         ...section,
         totalAnswers: sectionAnswers.length,
         answers: sectionAnswers,
-        draft: buildProfessionalDraft(section.title, section.description, sectionAnswers),
+        draft: generatedText || buildProfessionalDraft(section.title, section.description, sectionAnswers),
+        isAiGenerated: Boolean(generatedText),
       };
     });
-  }, [answers]);
+  }, [answers, generatedPlan]);
 
   const activeSection = answersBySection[activeSectionIndex] ?? answersBySection[0];
   const activeSectionAnswerCount = activeSection?.answers.length ?? 0;
@@ -189,6 +220,25 @@ export function BusinessPlanScreen({
                   o texto usa suas respostas como base de rascunho para validar o formato do plano.
                 </p>
 
+                {(generationStatus === 'polling') && (
+                  <div className="mb-5 flex items-center gap-3 rounded-2xl border border-[#B2C9BF] bg-[#f5faf7] p-4 text-sm text-[#052254]">
+                    <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
+                    <span>Gerando a versão profissional do plano com IA. Isso pode levar até alguns minutos.</span>
+                  </div>
+                )}
+                {generationStatus === 'generated' && (
+                  <div className="mb-5 flex items-center gap-3 rounded-2xl border border-[#329314]/40 bg-[#e5f0ea] p-4 text-sm text-[#0A5740]">
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                    <span>Plano profissional gerado com IA. As seções abaixo já refletem o conteúdo revisado.</span>
+                  </div>
+                )}
+                {(generationStatus === 'failed' || generationStatus === 'timeout') && (
+                  <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+                    Não foi possível concluir a geração com IA agora. As seções abaixo seguem mostrando o rascunho
+                    a partir das suas respostas.
+                  </div>
+                )}
+
                 <div className="mb-5 rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur-sm">
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div>
@@ -237,7 +287,14 @@ export function BusinessPlanScreen({
                       <div className="flex items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 text-[#329314] flex-shrink-0 mt-1" />
                         <div>
-                          <h3 className="font-bold text-gray-900">{activeSection.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-gray-900">{activeSection.title}</h3>
+                            {activeSection.isAiGenerated && (
+                              <span className="rounded-full bg-[#e5f0ea] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#0A5740]">
+                                Gerado com IA
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600">{activeSection.description}</p>
                         </div>
                       </div>
@@ -249,6 +306,19 @@ export function BusinessPlanScreen({
                     <div className="rounded-xl bg-[#f5faf7] p-4 text-sm leading-7 text-gray-700">
                       {activeSection.draft}
                     </div>
+
+                    {activeSection.generatedField === 'risksAndMitigations' && generatedPlan?.nextSteps?.length ? (
+                      <div className="mt-4 rounded-xl border border-gray-200 p-4">
+                        <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+                          Próximos passos sugeridos pela IA
+                        </p>
+                        <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
+                          {generatedPlan.nextSteps.map((step, index) => (
+                            <li key={index}>{step}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
 
                     <div className="mt-5 space-y-3">
                       <p className="text-xs font-bold uppercase tracking-widest text-gray-500">

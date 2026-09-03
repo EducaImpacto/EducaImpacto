@@ -169,6 +169,17 @@ export async function getProjectBusinessPlans(projectId: string) {
   return data;
 }
 
+export async function getBusinessPlan(businessPlanId: string) {
+  const { data, error } = await supabase
+    .from('business_plans')
+    .select('*')
+    .eq('id', businessPlanId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getNextBusinessPlanVersion(projectId: string) {
   const { data, error } = await supabase
     .from('business_plans')

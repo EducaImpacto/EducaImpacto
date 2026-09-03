@@ -6,6 +6,7 @@ import { OnboardingScreen } from './screens/OnboardingScreen';
 import { MissionScreen } from './screens/MissionScreen';
 import { ModuleCompletedScreen } from './screens/ModuleCompletedScreen';
 import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
+import type { GeneratedBusinessPlanContent } from './screens/BusinessPlanScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
 import type { BusinessPlanHistoryItem } from './screens/DashboardScreen';
 import { AppHeader } from './components/AppHeader';
@@ -24,6 +25,8 @@ import {
   upsertDiagnostic,
   upsertMissionAnswer,
 } from './services/backendRepository';
+import { triggerBusinessPlanGeneration } from './services/agentsApi';
+import { useBusinessPlanPolling } from './hooks/useBusinessPlanPolling';
 import type { User } from '@supabase/supabase-js';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
@@ -382,6 +385,8 @@ export default function App() {
   const [syncMessage, setSyncMessage] = useState('');
   const [isPreparingPlan, setIsPreparingPlan] = useState(false);
   const [businessPlanHistory, setBusinessPlanHistory] = useState<BusinessPlanHistoryItem[]>([]);
+  const [activeBusinessPlanId, setActiveBusinessPlanId] = useState<string | null>(null);
+  const { status: planGenerationStatus, plan: generatedBusinessPlan } = useBusinessPlanPolling(activeBusinessPlanId);
 
   useEffect(() => {
     window.scrollTo({
@@ -782,71 +787,108 @@ export default function App() {
         title: '1. Sumário Executivo',
         blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
         description: 'Síntese objetiva do negócio, da oportunidade identificada e da solução proposta.',
+        generatedField: 'executiveSummary' as const,
       },
       {
         title: '2. Descrição do Negócio',
         blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Operação básica'],
         description: 'Apresentação do que será oferecido, como o negócio começa e quais recursos já existem.',
+        generatedField: 'businessDescription' as const,
       },
       {
         title: '3. Público-Alvo e Mercado',
         blocks: ['Cliente e mercado', 'Canais de venda e aquisição'],
         description: 'Perfil do cliente, contexto de compra, canais de acesso e mercado inicial.',
+        generatedField: 'targetAudienceAndMarket' as const,
       },
       {
         title: '4. Problema e Oportunidade',
         blocks: ['Problema', 'Cliente e mercado'],
         description: 'Dor principal do cliente e oportunidade que justifica a existência do negócio.',
+        generatedField: 'problemAndOpportunity' as const,
       },
       {
         title: '5. Solução e Proposta de Valor',
         blocks: ['Proposta de valor', 'Produto / Serviço'],
         description: 'Como a solução responde ao problema e por que ela pode ser relevante para o cliente.',
+        generatedField: 'solutionAndValueProposition' as const,
       },
       {
         title: '6. Plano Operacional',
         blocks: ['Operação básica'],
         description: 'Primeiros processos, recursos, estrutura necessária e forma de entrega.',
+        generatedField: 'operationsPlan' as const,
       },
       {
         title: '7. Marketing e Vendas',
         blocks: ['Canais de venda e aquisição', 'Cliente e mercado', 'Crescimento'],
         description: 'Canais para encontrar clientes, comunicar a oferta e iniciar as primeiras vendas.',
+        generatedField: 'marketingAndSalesPlan' as const,
       },
       {
         title: '8. Financeiro Inicial',
         blocks: ['Custos', 'Receita'],
         description: 'Principais custos, fontes de receita e pontos que precisam de validação financeira.',
+        generatedField: 'financialOverview' as const,
       },
       {
         title: '9. Riscos e Próximos Passos',
         blocks: ['Crescimento', 'Custos', 'Operação básica'],
         description: 'Incertezas, validações pendentes e ações recomendadas para evoluir o negócio.',
+        generatedField: 'risksAndMitigations' as const,
       },
     ];
 
+    // Se a IA (educaimpacto-agents) ja gerou o plano profissional para este
+    // registro, priorizamos o texto gerado em vez das respostas brutas —
+    // ver monolito/supabase/ai-business-plan-contract.md.
+    const generatedPlanContent =
+      generatedBusinessPlan?.status === 'generated' && generatedBusinessPlan.content
+        ? (generatedBusinessPlan.content as { generatedPlan?: Record<string, unknown> }).generatedPlan
+        : undefined;
+    const nextSteps = Array.isArray(generatedPlanContent?.nextSteps)
+      ? (generatedPlanContent.nextSteps as string[])
+      : undefined;
+
     const sectionsHtml = professionalSections.map((section) => {
-      const sectionAnswers = businessPlanAnswers.filter((answer) =>
-        answer.planBlocks.some((block) => section.blocks.includes(block))
-      );
+      const generatedText = generatedPlanContent?.[section.generatedField];
 
-      const sourceText = sectionAnswers
-        .slice(0, 4)
-        .map((answer) => answer.answer.trim())
-        .filter(Boolean)
-        .join(' ');
+      let sectionDraft: string;
+      let insumosLabel: string;
 
-      const sectionDraft = sourceText
-        ? `${section.description} Com base nas informações fornecidas, o plano deve considerar: ${sourceText}`
-        : 'Esta seção será consolidada pela IA assim que houver informações suficientes para análise.';
+      if (typeof generatedText === 'string' && generatedText.trim()) {
+        sectionDraft = generatedText.trim();
+        insumosLabel = 'gerado com IA';
+      } else {
+        const sectionAnswers = businessPlanAnswers.filter((answer) =>
+          answer.planBlocks.some((block) => section.blocks.includes(block))
+        );
+
+        const sourceText = sectionAnswers
+          .slice(0, 4)
+          .map((answer) => answer.answer.trim())
+          .filter(Boolean)
+          .join(' ');
+
+        sectionDraft = sourceText
+          ? `${section.description} Com base nas informações fornecidas, o plano deve considerar: ${sourceText}`
+          : 'Esta seção será consolidada pela IA assim que houver informações suficientes para análise.';
+        insumosLabel = `${sectionAnswers.length} insumos mapeados`;
+      }
+
+      const nextStepsHtml =
+        section.generatedField === 'risksAndMitigations' && nextSteps?.length
+          ? `<ul>${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ul>`
+          : '';
 
       return `
         <section class="plan-section">
           <div class="section-heading">
             <strong>${escapeHtml(section.title)}</strong>
-            <span>${sectionAnswers.length} insumos mapeados</span>
+            <span>${escapeHtml(insumosLabel)}</span>
           </div>
           <p>${escapeHtml(sectionDraft).replace(/\n/g, '<br />')}</p>
+          ${nextStepsHtml}
         </section>
       `;
     }).join('');
@@ -1089,7 +1131,15 @@ export default function App() {
         ...current.filter((plan) => plan.id !== savedPlan.id),
       ]);
 
-      setSyncMessage('Plano preparado no Supabase para a integracao com IA.');
+      setActiveBusinessPlanId(savedPlan.id);
+      setSyncMessage('Plano preparado no Supabase. Gerando versao profissional com IA...');
+
+      // Fire-and-forget: o backend responde 202 assim que a geracao comeca;
+      // o resultado e observado via polling (useBusinessPlanPolling).
+      triggerBusinessPlanGeneration(savedPlan.id).catch((error) => {
+        console.error('Nao foi possivel iniciar a geracao do plano com IA.', error);
+        setSyncMessage('Plano salvo, mas nao foi possivel iniciar a geracao com IA agora.');
+      });
     } catch (error) {
       console.error('Nao foi possivel preparar o plano para IA.', error);
       setSyncMessage('Previa aberta. Nao foi possivel salvar o plano no Supabase agora.');
@@ -1323,6 +1373,12 @@ export default function App() {
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
           onShare={() => alert('Compartilhamento disponível em breve!')}
           onBackToDashboard={handleOpenModules}
+          generationStatus={activeBusinessPlanId ? planGenerationStatus : 'idle'}
+          generatedPlan={
+            generatedBusinessPlan?.status === 'generated'
+              ? (generatedBusinessPlan.content as { generatedPlan?: GeneratedBusinessPlanContent }).generatedPlan
+              : undefined
+          }
         />
       )}
 
