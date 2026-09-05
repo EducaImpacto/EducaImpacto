@@ -210,7 +210,7 @@ export interface Database {
           title: string;
           content: Json;
           generated_from: Json;
-          status: 'draft' | 'generated' | 'approved' | 'archived' | 'failed';
+          status: 'draft' | 'processing' | 'generated' | 'approved' | 'archived' | 'failed';
           created_at: string;
           updated_at: string;
         };
@@ -221,7 +221,7 @@ export interface Database {
           title?: string;
           content?: Json;
           generated_from?: Json;
-          status?: 'draft' | 'generated' | 'approved' | 'archived';
+          status?: 'draft' | 'processing' | 'generated' | 'approved' | 'archived' | 'failed';
           created_at?: string;
           updated_at?: string;
         };
@@ -230,7 +230,7 @@ export interface Database {
           title?: string;
           content?: Json;
           generated_from?: Json;
-          status?: 'draft' | 'generated' | 'approved' | 'archived';
+          status?: 'draft' | 'processing' | 'generated' | 'approved' | 'archived' | 'failed';
           updated_at?: string;
         };
       };

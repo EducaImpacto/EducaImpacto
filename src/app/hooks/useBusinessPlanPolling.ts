@@ -4,7 +4,10 @@ import { getBusinessPlan, type BusinessPlanRow } from '../services/backendReposi
 export type BusinessPlanPollingStatus = 'idle' | 'polling' | 'generated' | 'failed' | 'timeout';
 
 const POLL_INTERVAL_MS = 4000;
-const POLL_TIMEOUT_MS = 3 * 60 * 1000;
+// 6 min: cobre o cold start do Render (retries do disparo podem levar ~2,5 min
+// ate a linha sair de 'draft') + a geracao em si. Ver tambem o reset do relogio
+// abaixo, quando o backend assume a geracao ('processing').
+const POLL_TIMEOUT_MS = 6 * 60 * 1000;
 
 /**
  * Poll de `business_plans.status` ate a geracao com IA (educaimpacto-agents)
@@ -15,6 +18,7 @@ export function useBusinessPlanPolling(businessPlanId: string | null) {
   const [status, setStatus] = useState<BusinessPlanPollingStatus>('idle');
   const [plan, setPlan] = useState<BusinessPlanRow | null>(null);
   const startedAtRef = useRef<number | null>(null);
+  const sawProcessingRef = useRef(false);
 
   useEffect(() => {
     if (!businessPlanId) {
@@ -25,6 +29,7 @@ export function useBusinessPlanPolling(businessPlanId: string | null) {
 
     let cancelled = false;
     startedAtRef.current = Date.now();
+    sawProcessingRef.current = false;
     setStatus('polling');
 
     const poll = async () => {
@@ -33,6 +38,13 @@ export function useBusinessPlanPolling(businessPlanId: string | null) {
         if (cancelled || !row) return;
 
         setPlan(row);
+
+        if (row.status === 'processing' && !sawProcessingRef.current) {
+          // Backend assumiu a geracao: reinicia o orcamento de tempo para
+          // cobrir so a geracao em si, nao o cold start/retries do disparo.
+          sawProcessingRef.current = true;
+          startedAtRef.current = Date.now();
+        }
 
         if (row.status === 'generated') {
           setStatus('generated');

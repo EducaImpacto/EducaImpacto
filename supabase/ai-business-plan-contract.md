@@ -17,7 +17,7 @@ Campos usados agora:
 - `project_id`: projeto do usuario.
 - `version`: versao incremental do plano naquele projeto.
 - `title`: titulo do plano.
-- `status`: `draft` enquanto ainda nao passou pela IA.
+- `status`: ciclo de vida `draft` (aguardando IA) -> `processing` (geracao em andamento) -> `generated` (plano pronto) ou `failed` (geracao falhou apos as tentativas). Tambem pode ir para `approved`/`archived` via fluxo do usuario.
 - `content`: corpo estruturado que a IA deve usar como base.
 - `generated_from`: metadados da geracao e diagnostico.
 
@@ -98,7 +98,9 @@ Formato sugerido para salvar de volta em `business_plans.content.generatedPlan`:
 }
 ```
 
-Depois de salvar o plano gerado, atualizar `status` para `generated`.
+Ao iniciar a geracao, o backend marca `status = 'processing'`. Depois de salvar o
+plano gerado, atualiza `status` para `generated` (ou `failed` se a geracao falhar
+apos todas as tentativas).
 
 ## Formato atual de `generated_from`
 

@@ -25,7 +25,7 @@ import {
   upsertDiagnostic,
   upsertMissionAnswer,
 } from './services/backendRepository';
-import { triggerBusinessPlanGeneration } from './services/agentsApi';
+import { triggerBusinessPlanGeneration, warmUpAgentsApi } from './services/agentsApi';
 import { useBusinessPlanPolling } from './hooks/useBusinessPlanPolling';
 import type { User } from '@supabase/supabase-js';
 
@@ -427,6 +427,26 @@ export default function App() {
       isMounted = false;
       authListener.subscription.unsubscribe();
     };
+  }, []);
+
+  // Cold start do Render free: "acorda" o servico do agente o quanto antes.
+  // Ping no primeiro load, de novo ao entrar no fluxo de geracao, e um
+  // keep-alive enquanto a aba estiver aberta e visivel.
+  useEffect(() => {
+    void warmUpAgentsApi();
+  }, []);
+
+  useEffect(() => {
+    if (screen === 'dashboard' || screen === 'business-plan') {
+      void warmUpAgentsApi();
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') void warmUpAgentsApi();
+    }, 10 * 60 * 1000);
+    return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
@@ -1063,6 +1083,10 @@ export default function App() {
 
     setScreen('business-plan');
     setIsPreparingPlan(true);
+
+    // Cutuca o Render enquanto o snapshot e salvo no Supabase, pro cold start
+    // rodar em paralelo com o insert.
+    void warmUpAgentsApi();
 
     const modulesSnapshot = buildBusinessPlanModulesSnapshot(respostas);
     const answeredQuestions = modulesSnapshot.reduce((total, module) => total + module.answeredQuestions, 0);
