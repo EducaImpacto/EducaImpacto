@@ -164,28 +164,28 @@ export function BusinessPlanScreen({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-8"
+          className="mb-6 overflow-hidden rounded-lg bg-white shadow-xl sm:mb-8"
         >
-          <div className="bg-gradient-to-r from-[#329314] via-[#0A5740] to-[#329314] px-8 py-12 text-center">
+          <div className="bg-gradient-to-r from-[#329314] via-[#0A5740] to-[#329314] px-4 py-8 text-center sm:px-8 sm:py-10 lg:py-12">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg sm:h-20 sm:w-20 lg:h-24 lg:w-24"
             >
-              <CheckCircle2 className="w-12 h-12 text-[#329314]" />
+              <CheckCircle2 className="h-8 w-8 text-[#329314] sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
             </motion.div>
 
             <motion.h1
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl font-bold text-white mb-4"
+              className="mx-auto mb-3 max-w-4xl text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl"
             >
               Plano de Negócios concluído
             </motion.h1>
@@ -194,7 +194,7 @@ export function BusinessPlanScreen({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-xl text-[#e5f0ea] mb-6"
+              className="mx-auto mb-5 max-w-4xl text-base leading-relaxed text-[#e5f0ea] sm:text-lg lg:text-xl"
             >
               A IA organizou suas respostas em uma estrutura profissional para apresentar e validar sua ideia.
             </motion.p>
@@ -203,7 +203,7 @@ export function BusinessPlanScreen({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="flex justify-center gap-3 flex-wrap"
+              className="mx-auto flex max-w-4xl flex-wrap justify-center gap-2 sm:gap-3"
             >
               <Badge type="trophy" label="Jornada Completa" color="green" />
               <Badge type="star" label={`Perfil: ${profileLabels[diagnosticData.nivel]}`} color="orange" />
@@ -211,36 +211,36 @@ export function BusinessPlanScreen({
             </motion.div>
           </div>
 
-          <div className="p-8">
-            <div className="grid lg:grid-cols-[1fr_320px] gap-8 mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Plano profissional estruturado</h2>
-                <p className="text-gray-600 mb-6">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8">
+              <div className="min-w-0">
+                <h2 className="mb-3 text-xl font-bold text-gray-900 sm:text-2xl">Plano profissional estruturado</h2>
+                <p className="mb-5 max-w-4xl text-sm leading-relaxed text-gray-600 sm:text-base">
                   Esta versão prepara a estrutura oficial que a IA deverá preencher e refinar. Por enquanto,
                   o texto usa suas respostas como base de rascunho para validar o formato do plano.
                 </p>
 
                 {(generationStatus === 'polling') && (
-                  <div className="mb-5 flex items-center gap-3 rounded-2xl border border-[#B2C9BF] bg-[#f5faf7] p-4 text-sm text-[#052254]">
+                  <div className="mb-5 flex items-start gap-3 rounded-lg border border-[#B2C9BF] bg-[#f5faf7] p-4 text-sm text-[#052254]">
                     <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
                     <span>Gerando a versão profissional do plano com IA. Isso pode levar até alguns minutos.</span>
                   </div>
                 )}
                 {generationStatus === 'generated' && (
-                  <div className="mb-5 flex items-center gap-3 rounded-2xl border border-[#329314]/40 bg-[#e5f0ea] p-4 text-sm text-[#0A5740]">
+                  <div className="mb-5 flex items-start gap-3 rounded-lg border border-[#329314]/40 bg-[#e5f0ea] p-4 text-sm text-[#0A5740]">
                     <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
                     <span>Plano profissional gerado com IA. As seções abaixo já refletem o conteúdo revisado.</span>
                   </div>
                 )}
                 {(generationStatus === 'failed' || generationStatus === 'timeout') && (
-                  <div className="mb-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+                  <div className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
                     Não foi possível concluir a geração com IA agora. As seções abaixo seguem mostrando o rascunho
                     a partir das suas respostas.
                   </div>
                 )}
 
-                <div className="mb-5 rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur-sm">
-                  <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="mb-5 rounded-lg border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur-sm">
+                  <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
                         Seções do plano
@@ -249,7 +249,7 @@ export function BusinessPlanScreen({
                         Mostrando {activeSectionIndex + 1} de {answersBySection.length}
                       </p>
                     </div>
-                    <div className="text-right text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 sm:text-right">
                       <div className="font-semibold text-gray-700">{activeSectionAnswerCount} insumos</div>
                       <div>da seção atual</div>
                     </div>
@@ -265,7 +265,7 @@ export function BusinessPlanScreen({
                           key={section.title}
                           type="button"
                           onClick={() => setActiveSectionIndex(index)}
-                          className={`min-w-[180px] rounded-2xl px-4 py-3 text-left transition-all ${
+                          className={`min-w-[160px] rounded-lg px-3 py-3 text-left transition-all sm:min-w-[180px] sm:px-4 ${
                             isActive
                               ? 'bg-[#052254] text-white shadow-md'
                               : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
@@ -282,12 +282,12 @@ export function BusinessPlanScreen({
                 </div>
 
                 {activeSection && (
-                  <div className="border border-gray-200 rounded-2xl p-5">
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex items-start gap-3">
+                  <div className="rounded-lg border border-gray-200 p-4 sm:p-5">
+                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex min-w-0 items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 text-[#329314] flex-shrink-0 mt-1" />
-                        <div>
-                          <div className="flex items-center gap-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-bold text-gray-900">{activeSection.title}</h3>
                             {activeSection.isAiGenerated && (
                               <span className="rounded-full bg-[#e5f0ea] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#0A5740]">
@@ -303,12 +303,12 @@ export function BusinessPlanScreen({
                       </div>
                     </div>
 
-                    <div className="rounded-xl bg-[#f5faf7] p-4 text-sm leading-7 text-gray-700">
+                    <div className="whitespace-pre-wrap break-words rounded-lg bg-[#f5faf7] p-4 text-sm leading-7 text-gray-700">
                       {activeSection.draft}
                     </div>
 
                     {activeSection.generatedField === 'risksAndMitigations' && generatedPlan?.nextSteps?.length ? (
-                      <div className="mt-4 rounded-xl border border-gray-200 p-4">
+                      <div className="mt-4 rounded-lg border border-gray-200 p-4">
                         <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
                           Próximos passos sugeridos pela IA
                         </p>
@@ -325,8 +325,8 @@ export function BusinessPlanScreen({
                         Insumos usados nesta seção
                       </p>
                       {activeSection.answers.map((answer) => (
-                        <div key={`${activeSection.title}-${answer.missionId}`} className="bg-gray-50 rounded-xl p-4">
-                          <div className="flex items-start justify-between gap-3 mb-1">
+                        <div key={`${activeSection.title}-${answer.missionId}`} className="rounded-lg bg-gray-50 p-4">
+                          <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div className="text-sm font-semibold text-[#052254]">
                               {answer.missionTitle}
                             </div>
@@ -347,10 +347,11 @@ export function BusinessPlanScreen({
                       )}
                     </div>
 
-                    <div className="mt-5 flex items-center justify-between gap-3">
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <Button
                         variant="outline"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => setActiveSectionIndex((current) => Math.max(0, current - 1))}
                         disabled={activeSectionIndex === 0}
                       >
@@ -360,6 +361,7 @@ export function BusinessPlanScreen({
                       <Button
                         variant="outline"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => setActiveSectionIndex((current) => Math.min(answersBySection.length - 1, current + 1))}
                         disabled={activeSectionIndex === answersBySection.length - 1}
                       >
@@ -370,7 +372,7 @@ export function BusinessPlanScreen({
                 )}
               </div>
 
-              <aside className="space-y-5">
+              <aside className="grid min-w-0 gap-4 sm:grid-cols-2 lg:block lg:space-y-5">
                 <div className="bg-[#f5faf7] border-l-4 border-[#052254] rounded-lg p-5">
                   <h3 className="font-bold text-[#06173C] mb-3">Estrutura contemplada</h3>
                   <div className="space-y-2 text-sm text-[#06173C]">
@@ -389,7 +391,7 @@ export function BusinessPlanScreen({
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                   <h3 className="font-bold text-gray-900 mb-2">Blocos internos preenchidos</h3>
                   <p className="text-sm text-gray-600 mb-4">
                     {new Set(answers.flatMap((answer) => answer.planBlocks)).size} de 10 blocos estruturais receberam dados.
@@ -404,7 +406,7 @@ export function BusinessPlanScreen({
               </aside>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <div className="mb-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
               <Button variant="primary" size="lg" className="w-full" onClick={onDownload}>
                 <FileDown className="w-5 h-5 mr-2 inline" />
                 Baixar PDF
@@ -433,17 +435,17 @@ export function BusinessPlanScreen({
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="bg-white rounded-2xl shadow-lg p-8 mb-8"
+          className="mb-8 rounded-lg bg-white p-4 shadow-lg sm:p-6 lg:p-8"
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="mb-6 flex items-center gap-3">
             <MessageSquare className="w-6 h-6 text-[#052254]" />
-            <h2 className="text-2xl font-bold text-gray-900">Validação da experiência</h2>
+            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">Validação da experiência</h2>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
             <div>
               <p className="text-gray-600 mb-4">O plano gerado representa bem seu negócio?</p>
-              <div className="flex gap-2 mb-6">
+              <div className="mb-6 flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
