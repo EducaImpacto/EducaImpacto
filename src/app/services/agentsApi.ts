@@ -1,6 +1,12 @@
 import { supabase } from '../lib/supabase';
 
-const AGENTS_API_URL = import.meta.env.VITE_AGENTS_API_URL;
+const FALLBACK_AGENTS_API_URL = 'https://agente-educaimpacto.onrender.com';
+
+function normalizeApiUrl(value: string | undefined): string {
+  return (value?.trim() || FALLBACK_AGENTS_API_URL).replace(/\/+$/, '');
+}
+
+const AGENTS_API_URL = normalizeApiUrl(import.meta.env.VITE_AGENTS_API_URL);
 
 export class AgentsApiError extends Error {}
 
@@ -76,10 +82,6 @@ function isAbortError(error: unknown): boolean {
  * (ver useBusinessPlanPolling).
  */
 export async function triggerBusinessPlanGeneration(businessPlanId: string): Promise<void> {
-  if (!AGENTS_API_URL) {
-    throw new AgentsApiError('VITE_AGENTS_API_URL nao configurada.');
-  }
-
   const {
     data: { session },
   } = await supabase.auth.getSession();
