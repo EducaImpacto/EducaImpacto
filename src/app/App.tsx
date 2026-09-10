@@ -1273,9 +1273,9 @@ export default function App() {
         onSignOut={handleSignOut}
       />
 
-      {(syncMessage || isPreparingPlan) && (
+      {isPreparingPlan && (
         <div className="border-b border-[#dbe9e2] bg-[#f5faf7] px-4 py-2 text-center text-xs font-semibold text-[#052254]">
-          {isPreparingPlan ? 'Preparando plano no Supabase para a IA...' : syncMessage}
+          Preparando plano para a IA...
         </div>
       )}
 
