@@ -386,6 +386,7 @@ export default function App() {
   const [isPreparingPlan, setIsPreparingPlan] = useState(false);
   const [businessPlanHistory, setBusinessPlanHistory] = useState<BusinessPlanHistoryItem[]>([]);
   const [activeBusinessPlanId, setActiveBusinessPlanId] = useState<string | null>(null);
+  const [planGenerationError, setPlanGenerationError] = useState(false);
   const { status: planGenerationStatus, plan: generatedBusinessPlan } = useBusinessPlanPolling(activeBusinessPlanId);
 
   useEffect(() => {
@@ -1083,6 +1084,7 @@ export default function App() {
 
     setScreen('business-plan');
     setIsPreparingPlan(true);
+    setPlanGenerationError(false);
 
     // Cutuca o Render enquanto o snapshot e salvo no Supabase, pro cold start
     // rodar em paralelo com o insert.
@@ -1162,6 +1164,7 @@ export default function App() {
       // o resultado e observado via polling (useBusinessPlanPolling).
       triggerBusinessPlanGeneration(savedPlan.id).catch((error) => {
         console.error('Nao foi possivel iniciar a geracao do plano com IA.', error);
+        setPlanGenerationError(true);
         setSyncMessage('Plano salvo, mas nao foi possivel iniciar a geracao com IA agora.');
       });
     } catch (error) {
@@ -1397,7 +1400,7 @@ export default function App() {
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
           onShare={() => alert('Compartilhamento disponível em breve!')}
           onBackToDashboard={handleOpenModules}
-          generationStatus={activeBusinessPlanId ? planGenerationStatus : 'idle'}
+          generationStatus={planGenerationError ? 'failed' : activeBusinessPlanId ? planGenerationStatus : 'idle'}
           generatedPlan={
             generatedBusinessPlan?.status === 'generated'
               ? (generatedBusinessPlan.content as { generatedPlan?: GeneratedBusinessPlanContent }).generatedPlan
