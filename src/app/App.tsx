@@ -369,6 +369,25 @@ function escapeHtml(value: string) {
     .replace(/'/g, '&#039;');
 }
 
+function renderPdfParagraphs(value: string) {
+  return value
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br />')}</p>`)
+    .join('');
+}
+
+function renderPdfList(items: string[] | undefined) {
+  if (!items?.length) return '';
+
+  return `
+    <ol class="next-steps">
+      ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+    </ol>
+  `;
+}
+
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
@@ -871,16 +890,17 @@ export default function App() {
     const nextSteps = Array.isArray(generatedPlanContent?.nextSteps)
       ? (generatedPlanContent.nextSteps as string[])
       : undefined;
+    const isAiGeneratedPlan = Boolean(generatedPlanContent);
 
     const sectionsHtml = professionalSections.map((section) => {
       const generatedText = generatedPlanContent?.[section.generatedField];
 
       let sectionDraft: string;
-      let insumosLabel: string;
+      let sectionSourceLabel: string;
 
       if (typeof generatedText === 'string' && generatedText.trim()) {
         sectionDraft = generatedText.trim();
-        insumosLabel = 'gerado com IA';
+        sectionSourceLabel = 'Conteúdo gerado por IA';
       } else {
         const sectionAnswers = businessPlanAnswers.filter((answer) =>
           answer.planBlocks.some((block) => section.blocks.includes(block))
@@ -895,25 +915,31 @@ export default function App() {
         sectionDraft = sourceText
           ? `${section.description} Com base nas informações fornecidas, o plano deve considerar: ${sourceText}`
           : 'Esta seção será consolidada pela IA assim que houver informações suficientes para análise.';
-        insumosLabel = `${sectionAnswers.length} insumos mapeados`;
+        sectionSourceLabel = `${sectionAnswers.length} insumos mapeados`;
       }
 
       const nextStepsHtml =
         section.generatedField === 'risksAndMitigations' && nextSteps?.length
-          ? `<ul>${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ul>`
+          ? renderPdfList(nextSteps)
           : '';
 
       return `
         <section class="plan-section">
-          <div class="section-heading">
-            <strong>${escapeHtml(section.title)}</strong>
-            <span>${escapeHtml(insumosLabel)}</span>
+          <div class="section-kicker">${escapeHtml(sectionSourceLabel)}</div>
+          <div class="section-title-row">
+            <h2>${escapeHtml(section.title)}</h2>
           </div>
-          <p>${escapeHtml(sectionDraft).replace(/\n/g, '<br />')}</p>
-          ${nextStepsHtml}
+          <div class="section-body">
+            ${renderPdfParagraphs(sectionDraft)}
+            ${nextStepsHtml}
+          </div>
         </section>
       `;
     }).join('');
+
+    const summaryItemsHtml = professionalSections
+      .map((section) => `<li><span>${escapeHtml(section.title)}</span></li>`)
+      .join('');
 
     const planWindow = window.open('', '_blank');
 
@@ -930,139 +956,277 @@ export default function App() {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Plano de Negócios Educa Impacto</title>
           <style>
+            @page { size: A4; margin: 16mm 14mm; }
             * { box-sizing: border-box; }
             body {
               margin: 0;
-              background: #ffffff;
+              background: #f5faf7;
               color: #06173C;
-              font-family: Arial, Helvetica, sans-serif;
-              line-height: 1.55;
+              font-family: Inter, Arial, Helvetica, sans-serif;
+              font-size: 12px;
+              line-height: 1.65;
             }
             .page {
-              width: 210mm;
-              min-height: 297mm;
+              background: #ffffff;
+              box-shadow: 0 18px 50px rgba(6, 23, 60, 0.12);
               margin: 0 auto;
-              padding: 22mm 18mm;
+              max-width: 210mm;
+              min-height: 297mm;
+              overflow: hidden;
             }
-            header {
-              border-bottom: 4px solid #329314;
-              margin-bottom: 24px;
-              padding-bottom: 18px;
+            .cover {
+              background: linear-gradient(135deg, #052254 0%, #0A5740 62%, #329314 100%);
+              color: #ffffff;
+              min-height: 116mm;
+              padding: 20mm 18mm 18mm;
+              position: relative;
             }
-            .brand {
-              color: #052254;
-              font-size: 13px;
+            .cover::after {
+              border: 1px solid rgba(255, 255, 255, 0.26);
+              border-radius: 999px;
+              content: "";
+              height: 95mm;
+              position: absolute;
+              right: -30mm;
+              top: -32mm;
+              width: 95mm;
+            }
+            .brand-row {
+              align-items: center;
+              display: flex;
+              justify-content: space-between;
+              gap: 18px;
+              position: relative;
+              z-index: 1;
+            }
+            .logo {
+              background: #ffffff;
+              border-radius: 8px;
+              height: 28mm;
+              max-width: 68mm;
+              object-fit: contain;
+              padding: 3mm;
+            }
+            .doc-label {
+              border: 1px solid rgba(255, 255, 255, 0.38);
+              border-radius: 999px;
+              color: #e5f0ea;
+              font-size: 9px;
               font-weight: 700;
-              letter-spacing: 0.08em;
+              letter-spacing: 0.12em;
+              padding: 7px 11px;
               text-transform: uppercase;
             }
             h1 {
-              margin: 8px 0 8px;
-              color: #052254;
-              font-size: 32px;
-              line-height: 1.15;
+              font-size: 38px;
+              line-height: 1.05;
+              margin: 24mm 0 8px;
+              max-width: 138mm;
             }
             .subtitle {
               margin: 0;
-              color: #3b4a5f;
-              font-size: 14px;
+              color: #e5f0ea;
+              font-size: 15px;
+              max-width: 145mm;
             }
             .meta {
               display: grid;
               grid-template-columns: repeat(3, 1fr);
-              gap: 10px;
-              margin: 22px 0;
+              gap: 8px;
+              margin-top: 15mm;
+              position: relative;
+              z-index: 1;
             }
             .meta div {
-              border: 1px solid #B2C9BF;
-              border-radius: 10px;
-              padding: 10px;
+              background: rgba(255, 255, 255, 0.12);
+              border: 1px solid rgba(255, 255, 255, 0.22);
+              border-radius: 8px;
+              padding: 10px 12px;
             }
             .meta span {
               display: block;
-              color: #516176;
-              font-size: 10px;
+              color: #B2C9BF;
+              font-size: 9px;
               font-weight: 700;
-              letter-spacing: 0.08em;
+              letter-spacing: 0.1em;
               text-transform: uppercase;
             }
             .meta strong {
               display: block;
               margin-top: 4px;
-              color: #06173C;
+              color: #ffffff;
               font-size: 14px;
+            }
+            .summary {
+              padding: 16mm 18mm 8mm;
+            }
+            .summary h2,
+            .plan-section h2 {
+              color: #052254;
+              font-size: 22px;
+              line-height: 1.2;
+              margin: 0;
+            }
+            .intro-card {
+              border-left: 4px solid #329314;
+              color: #334155;
+              margin-top: 10px;
+              padding: 0 0 0 12px;
+            }
+            .summary-grid {
+              display: grid;
+              gap: 8px;
+              grid-template-columns: repeat(3, 1fr);
+              margin-top: 14px;
+            }
+            .summary-grid li {
+              border: 1px solid #dbe9e2;
+              border-radius: 8px;
+              color: #06173C;
+              font-size: 11px;
+              font-weight: 700;
+              list-style: none;
+              padding: 9px 10px;
             }
             .plan-section {
               break-inside: avoid;
-              margin-top: 20px;
+              padding: 11mm 18mm 0;
             }
-            .section-heading {
-              align-items: center;
-              background: linear-gradient(90deg, #052254 0%, #0A5740 55%, #329314 100%);
-              border-radius: 10px;
-              color: #ffffff;
-              display: flex;
-              justify-content: space-between;
-              gap: 12px;
-              padding: 12px 14px;
-            }
-            .section-heading span {
-              font-size: 11px;
+            .section-kicker {
+              color: #329314;
+              font-size: 9px;
               font-weight: 700;
-              opacity: 0.9;
+              letter-spacing: 0.12em;
+              margin-bottom: 4px;
               text-transform: uppercase;
             }
-            .section-heading strong {
-              font-size: 17px;
+            .section-title-row {
+              border-bottom: 2px solid #dbe9e2;
+              margin-bottom: 10px;
+              padding-bottom: 8px;
             }
-            .plan-section p {
+            .section-body p {
+              color: #263244;
+              font-size: 12.5px;
+              margin: 0 0 9px;
+              text-align: justify;
+            }
+            .next-steps {
+              counter-reset: step;
+              display: grid;
+              gap: 8px;
+              margin: 10px 0 0;
+              padding: 0;
+            }
+            .next-steps li {
               border: 1px solid #dbe9e2;
-              border-radius: 10px;
-              margin-top: 10px;
-              padding: 14px;
+              border-radius: 8px;
+              list-style: none;
+              padding: 9px 10px 9px 36px;
+              position: relative;
+            }
+            .next-steps li::before {
+              background: #329314;
+              border-radius: 999px;
+              color: #ffffff;
+              content: counter(step);
+              counter-increment: step;
+              font-size: 10px;
+              font-weight: 700;
+              height: 20px;
+              left: 10px;
+              line-height: 20px;
+              position: absolute;
+              text-align: center;
+              top: 9px;
+              width: 20px;
             }
             footer {
               border-top: 1px solid #dbe9e2;
               color: #516176;
               font-size: 11px;
-              margin-top: 28px;
-              padding-top: 12px;
+              margin: 12mm 18mm 0;
+              padding: 8px 0 14mm;
+            }
+            .print-actions {
+              display: flex;
+              gap: 8px;
+              justify-content: center;
+              padding: 16px;
+            }
+            .print-actions button {
+              background: #052254;
+              border: 0;
+              border-radius: 8px;
+              color: #ffffff;
+              cursor: pointer;
+              font-weight: 700;
+              padding: 10px 14px;
             }
             @media print {
-              body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-              .page { margin: 0; width: auto; }
+              body {
+                background: #ffffff;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+              }
+              .page {
+                box-shadow: none;
+                margin: 0;
+                max-width: none;
+                min-height: auto;
+                width: auto;
+              }
+              .print-actions { display: none; }
             }
           </style>
         </head>
         <body>
           <main class="page">
-            <header>
-              <div class="brand">Educa Impacto</div>
+            <section class="cover">
+              <div class="brand-row">
+                <img class="logo" src="/logo-educa-impacto-horizontal.png" alt="Educa Impacto" />
+                <div class="doc-label">${isAiGeneratedPlan ? 'Plano gerado com IA' : 'Rascunho estruturado'}</div>
+              </div>
               <h1>Plano de Negócios</h1>
-              <p class="subtitle">Estrutura profissional preparada a partir das respostas da trilha iniciante.</p>
-            </header>
+              <p class="subtitle">Documento profissional estruturado a partir da jornada Educa Impacto, com foco em clareza, validação e próximos passos.</p>
 
-            <section class="meta">
-              <div>
-                <span>Perfil</span>
-                <strong>${escapeHtml(activeDiagnosticData.nivel)}</strong>
-              </div>
-              <div>
-                <span>Respostas</span>
-                <strong>${businessPlanAnswers.length} de ${TOTAL_MISSIONS}</strong>
-              </div>
-              <div>
-                <span>Gerado em</span>
-                <strong>${escapeHtml(generatedAt)}</strong>
-              </div>
+              <section class="meta">
+                <div>
+                  <span>Perfil</span>
+                  <strong>${escapeHtml(activeDiagnosticData.nivel)}</strong>
+                </div>
+                <div>
+                  <span>Base analisada</span>
+                  <strong>${businessPlanAnswers.length} de ${TOTAL_MISSIONS} respostas</strong>
+                </div>
+                <div>
+                  <span>Emissão</span>
+                  <strong>${escapeHtml(generatedAt)}</strong>
+                </div>
+              </section>
+            </section>
+
+            <section class="summary">
+              <h2>Estrutura do documento</h2>
+              <p class="intro-card">
+                Este plano organiza as informações fornecidas em uma linguagem executiva, pronta para apoiar validação,
+                apresentação da ideia e tomada de decisão sobre os próximos passos do negócio.
+              </p>
+              <ol class="summary-grid">
+                ${summaryItemsHtml}
+              </ol>
             </section>
 
             ${sectionsHtml || '<p>Nenhuma resposta adequada foi encontrada para compor o plano.</p>'}
 
             <footer>
-              Documento gerado pela plataforma Educa Impacto. A versão final com IA poderá complementar, revisar e estruturar este conteúdo.
+              Documento gerado pela plataforma Educa Impacto. Recomenda-se validar informações financeiras,
+              legais e operacionais antes de decisões comerciais.
             </footer>
           </main>
+          <div class="print-actions">
+            <button type="button" onclick="window.print()">Baixar / imprimir PDF</button>
+          </div>
           <script>
             window.addEventListener('load', () => {
               window.focus();
