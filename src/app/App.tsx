@@ -387,6 +387,7 @@ export default function App() {
   const [businessPlanHistory, setBusinessPlanHistory] = useState<BusinessPlanHistoryItem[]>([]);
   const [activeBusinessPlanId, setActiveBusinessPlanId] = useState<string | null>(null);
   const [planGenerationError, setPlanGenerationError] = useState(false);
+  const [planGenerationStarted, setPlanGenerationStarted] = useState(false);
   const { status: planGenerationStatus, plan: generatedBusinessPlan } = useBusinessPlanPolling(activeBusinessPlanId);
 
   useEffect(() => {
@@ -1085,6 +1086,7 @@ export default function App() {
     setScreen('business-plan');
     setIsPreparingPlan(true);
     setPlanGenerationError(false);
+    setPlanGenerationStarted(false);
 
     // Cutuca o Render enquanto o snapshot e salvo no Supabase, pro cold start
     // rodar em paralelo com o insert.
@@ -1162,11 +1164,15 @@ export default function App() {
 
       // Fire-and-forget: o backend responde 202 assim que a geracao comeca;
       // o resultado e observado via polling (useBusinessPlanPolling).
-      triggerBusinessPlanGeneration(savedPlan.id).catch((error) => {
-        console.error('Nao foi possivel iniciar a geracao do plano com IA.', error);
-        setPlanGenerationError(true);
-        setSyncMessage('Plano salvo, mas nao foi possivel iniciar a geracao com IA agora.');
-      });
+      triggerBusinessPlanGeneration(savedPlan.id)
+        .then(() => {
+          setPlanGenerationStarted(true);
+        })
+        .catch((error) => {
+          console.error('Nao foi possivel iniciar a geracao do plano com IA.', error);
+          setPlanGenerationError(true);
+          setSyncMessage('Plano salvo, mas nao foi possivel iniciar a geracao com IA agora.');
+        });
     } catch (error) {
       console.error('Nao foi possivel preparar o plano para IA.', error);
       setSyncMessage('Previa aberta. Nao foi possivel salvar o plano no Supabase agora.');
@@ -1400,7 +1406,15 @@ export default function App() {
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
           onShare={() => alert('Compartilhamento disponível em breve!')}
           onBackToDashboard={handleOpenModules}
-          generationStatus={planGenerationError ? 'failed' : activeBusinessPlanId ? planGenerationStatus : 'idle'}
+          generationStatus={
+            planGenerationError
+              ? 'failed'
+              : activeBusinessPlanId
+                ? planGenerationStatus === 'idle' && planGenerationStarted
+                  ? 'polling'
+                  : planGenerationStatus
+                : 'idle'
+          }
           generatedPlan={
             generatedBusinessPlan?.status === 'generated'
               ? (generatedBusinessPlan.content as { generatedPlan?: GeneratedBusinessPlanContent }).generatedPlan
