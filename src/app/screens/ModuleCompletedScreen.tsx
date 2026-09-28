@@ -54,16 +54,16 @@ export function ModuleCompletedScreen({
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-3xl shadow-2xl p-6 text-center sm:p-8 md:p-10"
+          className="rounded-2xl border border-[#dbe9e2] bg-white p-6 text-center shadow-xl sm:p-8 md:p-10"
         >
           {/* Ícone de Conquista */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-24 h-24 bg-gradient-to-br from-[#329314] to-[#329314] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0A5740] to-[#329314] shadow-lg"
           >
-            <Trophy className="w-12 h-12 text-white" />
+            <Trophy className="h-10 w-10 text-white" />
           </motion.div>
 
           {/* Título */}
@@ -71,9 +71,9 @@ export function ModuleCompletedScreen({
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+            className="mb-4 text-3xl font-bold text-[#052254] md:text-4xl"
           >
-            Módulo Concluído! 🎉
+            Módulo concluído
           </motion.h1>
 
           <motion.p
@@ -91,7 +91,7 @@ export function ModuleCompletedScreen({
             transition={{ delay: 0.43 }}
             className="mb-8 grid gap-4 md:grid-cols-[0.9fr_1.1fr]"
           >
-            <div className="rounded-2xl border-2 border-[#B2C9BF] bg-[#f5faf7] p-5 text-left">
+            <div className="rounded-xl border border-[#B2C9BF] bg-[#f5faf7] p-5 text-left">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#052254] to-[#0A5740]">
@@ -106,11 +106,11 @@ export function ModuleCompletedScreen({
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-white p-4">
+                <div className="rounded-lg bg-white p-4">
                   <div className="text-xs font-semibold text-gray-500">XP total</div>
                   <div className="mt-1 text-2xl font-bold text-[#329314]">{xp}</div>
                 </div>
-                <div className="rounded-xl bg-white p-4">
+                <div className="rounded-lg bg-white p-4">
                   <div className="text-xs font-semibold text-gray-500">Próximo nível</div>
                   <div className="mt-1 text-2xl font-bold text-[#052254]">
                     {xpToNextLevel === 0 ? 'Agora!' : `${xpToNextLevel} XP`}
@@ -119,7 +119,7 @@ export function ModuleCompletedScreen({
               </div>
             </div>
 
-            <div className="rounded-2xl border-2 border-[#7CAF70] bg-gradient-to-br from-[#e5f0ea] to-white p-5 text-left">
+            <div className="rounded-xl border border-[#7CAF70] bg-gradient-to-br from-[#e5f0ea] to-white p-5 text-left">
               <div className="mb-4 flex items-start gap-3">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#329314] text-white">
                   <Target className="h-5 w-5" />
@@ -140,7 +140,7 @@ export function ModuleCompletedScreen({
                 />
               </div>
 
-              <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-semibold leading-6 text-[#052254]">
+              <p className="mt-4 rounded-lg bg-white px-4 py-3 text-sm font-semibold leading-6 text-[#052254]">
                 {remainingProgress > 0
                   ? `Faltam ${remainingProgress}% para chegar ao plano de negócios e se preparar para buscar até R$ 10.000 em microcrédito.`
                   : 'Você chegou ao plano de negócios e já tem uma base melhor para se preparar para buscar microcrédito.'}
@@ -161,7 +161,7 @@ export function ModuleCompletedScreen({
 
             <div className="space-y-3">
               {answers.map((answer) => (
-                <div key={answer.missionId} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div key={answer.missionId} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                   <div className="flex items-start justify-between gap-3 mb-1">
                     <div className="text-sm font-semibold text-[#052254]">{answer.missionTitle}</div>
                     <button
@@ -184,7 +184,7 @@ export function ModuleCompletedScreen({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.5, type: "spring" }}
-            className="bg-gradient-to-r from-[#e5f0ea] to-[#e5f0ea] border-2 border-[#7CAF70] rounded-2xl p-5 mb-6 sm:p-6"
+            className="mb-6 rounded-xl border border-[#7CAF70] bg-gradient-to-r from-[#e5f0ea] to-[#e5f0ea] p-5 sm:p-6"
           >
             <div className="flex items-center justify-center gap-3">
               <Star className="w-8 h-8 text-[#329314]" />
