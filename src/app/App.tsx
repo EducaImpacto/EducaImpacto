@@ -1433,18 +1433,20 @@ export default function App() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen" data-build={APP_BUILD_MARKER}>
-      <AppHeader
-        onHome={handleGoHome}
-        onAbout={handleOpenAbout}
-        onOpenModules={handleOpenModules}
-        userEmail={authUser?.email ?? null}
-        onAuthClick={() => {
-          setAuthModalMode('signin');
-          setAuthMessage('');
-          setIsAuthModalOpen(true);
-        }}
-        onSignOut={handleSignOut}
-      />
+      {screen !== 'landing' && (
+        <AppHeader
+          onHome={handleGoHome}
+          onAbout={handleOpenAbout}
+          onOpenModules={handleOpenModules}
+          userEmail={authUser?.email ?? null}
+          onAuthClick={() => {
+            setAuthModalMode('signin');
+            setAuthMessage('');
+            setIsAuthModalOpen(true);
+          }}
+          onSignOut={handleSignOut}
+        />
+      )}
 
       {isPreparingPlan && (
         <div className="border-b border-[#dbe9e2] bg-[#f5faf7] px-4 py-2 text-center text-xs font-semibold text-[#052254]">
