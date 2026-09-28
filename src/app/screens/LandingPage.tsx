@@ -182,8 +182,11 @@ export function LandingPage({ onStart, onOpenModules }: LandingPageProps) {
     <div className="min-h-screen overflow-x-hidden bg-[#fbfdfa] text-[#052254]">
       <header className="sticky top-0 z-40 border-b border-[#d8e7df] bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-3 lg:px-8">
-          <a href="#inicio" className="flex items-center" aria-label="Ir para o inicio da Educa Impacto">
-            <BrandLogo className="h-14 sm:h-16" />
+          <a href="#inicio" className="flex items-center gap-3" aria-label="Ir para o inicio da Educa Impacto">
+            <BrandLogo compact className="h-11 w-11 sm:h-12 sm:w-12" />
+            <span className="hidden text-lg font-extrabold tracking-tight text-[#052254] sm:inline">
+              Educa Impacto
+            </span>
           </a>
           <nav className="hidden items-center gap-7 lg:flex">
             {navigation.map(([label, href]) => (

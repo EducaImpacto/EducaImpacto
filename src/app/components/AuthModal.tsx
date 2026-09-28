@@ -24,10 +24,16 @@ export function AuthModal({
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [localMessage, setLocalMessage] = useState('');
 
   useEffect(() => {
-    if (isOpen) setMode(initialMode);
+    if (isOpen) {
+      setMode(initialMode);
+      setLocalMessage('');
+      setConfirmPassword('');
+    }
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
@@ -36,8 +42,29 @@ export function AuthModal({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLocalMessage('');
+
+    if (!email.trim() || !password) {
+      setLocalMessage('Preencha e-mail e senha para continuar.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setLocalMessage('A senha precisa ter pelo menos 6 caracteres.');
+      return;
+    }
 
     if (isSignup) {
+      if (!fullName.trim()) {
+        setLocalMessage('Informe seu nome para criar a conta.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setLocalMessage('As senhas digitadas não conferem.');
+        return;
+      }
+
       await onSignUp(email.trim(), password, fullName.trim());
       return;
     }
@@ -107,9 +134,24 @@ export function AuthModal({
             />
           </label>
 
-          {message && (
+          {isSignup && (
+            <label className="block">
+              <span className="mb-1 block text-sm font-semibold text-[#06173C]">Repetir senha</span>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className="w-full rounded-lg border border-[#B2C9BF] px-4 py-3 text-sm outline-none transition-colors focus:border-[#329314] focus:ring-2 focus:ring-[#329314]/20"
+                placeholder="Digite a senha novamente"
+                minLength={6}
+                required
+              />
+            </label>
+          )}
+
+          {(localMessage || message) && (
             <div className="rounded-lg border border-[#B2C9BF] bg-[#f5faf7] px-4 py-3 text-sm text-[#06173C]">
-              {message}
+              {localMessage || message}
             </div>
           )}
 
@@ -120,7 +162,11 @@ export function AuthModal({
 
         <button
           type="button"
-          onClick={() => setMode(isSignup ? 'signin' : 'signup')}
+          onClick={() => {
+            setMode(isSignup ? 'signin' : 'signup');
+            setLocalMessage('');
+            setConfirmPassword('');
+          }}
           className="mt-4 w-full text-center text-sm font-semibold text-[#052254] hover:underline"
         >
           {isSignup ? 'Já tenho conta' : 'Ainda não tenho conta'}

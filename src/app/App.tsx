@@ -253,7 +253,9 @@ const ETAPAS: Etapa[] = [
   },
 ];
 
-const TOTAL_MISSIONS = ETAPAS.reduce((acc, e) => acc + e.missions.length, 0); // 20
+const TOTAL_MISSIONS = ETAPAS.reduce((acc, e) => acc + e.missions.length, 0);
+const TRAIL_COMPLETION_BONUS_XP = 50;
+const XP_PER_LEVEL = 300;
 const STORAGE_KEY = 'educa-impacto-progress-v1';
 const APP_BUILD_MARKER = '2026-07-27-plan-history-cache-fix-2';
 
@@ -360,6 +362,18 @@ function getAuthErrorMessage(error: unknown) {
   return message;
 }
 
+function getLevelFromXp(xp: number) {
+  return Math.max(1, Math.floor(xp / XP_PER_LEVEL) + 1);
+}
+
+function getNextLevelXp(level: number) {
+  return level * XP_PER_LEVEL;
+}
+
+function getModuleXp(etapa: Etapa) {
+  return etapa.missions.reduce((acc, mission) => acc + mission.xpReward, 0);
+}
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -426,7 +440,7 @@ export default function App() {
 
   // Gamificação
   const [xp, setXp] = useState(persistedState?.xp ?? 0);
-  const [nivel, setNivel] = useState(persistedState?.nivel ?? 1);
+  const [nivel, setNivel] = useState(persistedState?.nivel ?? getLevelFromXp(persistedState?.xp ?? 0));
 
   useEffect(() => {
     let isMounted = true;
@@ -462,6 +476,11 @@ export default function App() {
       void warmUpAgentsApi();
     }
   }, [screen]);
+
+  useEffect(() => {
+    const calculatedLevel = getLevelFromXp(xp);
+    if (nivel !== calculatedLevel) setNivel(calculatedLevel);
+  }, [nivel, xp]);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -784,15 +803,22 @@ export default function App() {
       return;
     }
 
+    const ultimaMissaoDaEtapa = missaoIndex === etapaAtual.missions.length - 1;
+    const ultimaMissaoDaTrilha = etapaIndex === ETAPAS.length - 1 && ultimaMissaoDaEtapa;
+    const wasAlreadyAnswered = isAdequateAnswer(respostas[missaoAtual.id]);
+    const earnedXp =
+      wasAlreadyAnswered
+        ? 0
+        : missaoAtual.xpReward + (ultimaMissaoDaTrilha ? TRAIL_COMPLETION_BONUS_XP : 0);
+
     // Salvar resposta
     setRespostas((prev) => ({ ...prev, [missaoAtual.id]: answer }));
 
-    // Ganhar XP
-    const novoXp = xp + missaoAtual.xpReward;
-    setXp(novoXp);
-    if (novoXp >= nivel * 300) setNivel((n) => n + 1);
-
-    const ultimaMissaoDaEtapa = missaoIndex === etapaAtual.missions.length - 1;
+    if (earnedXp > 0) {
+      const nextXp = xp + earnedXp;
+      setXp(nextXp);
+      setNivel(getLevelFromXp(nextXp));
+    }
 
     if (ultimaMissaoDaEtapa) {
       // Concluiu a etapa
@@ -1495,7 +1521,7 @@ export default function App() {
         <DashboardScreen
           level={nivel}
           xp={xp}
-          nextLevelXp={nivel * 300}
+          nextLevelXp={getNextLevelXp(nivel)}
           overallProgress={overallProgress}
           modules={modules}
           totalMissions={TOTAL_MISSIONS}
@@ -1542,8 +1568,17 @@ export default function App() {
       {screen === 'etapa-concluida' && (
         <ModuleCompletedScreen
           moduleTitle={etapaAtual.label}
-          xpGained={etapaAtual.missions.reduce((acc, m) => acc + m.xpReward, 0)}
+          xpGained={
+            getModuleXp(etapaAtual) +
+            (etapaIndex === ETAPAS.length - 1 ? TRAIL_COMPLETION_BONUS_XP : 0)
+          }
           badgeLabel={etapaAtual.badge}
+          level={nivel}
+          xp={xp}
+          nextLevelXp={getNextLevelXp(nivel)}
+          overallProgress={overallProgress}
+          completedMissions={completedMissionCount}
+          totalMissions={TOTAL_MISSIONS}
           answers={currentModuleAnswers}
           onEditAnswer={(missionId) => handleEditAnswer(missionId, 'etapa-concluida')}
           onNext={handleNextEtapa}

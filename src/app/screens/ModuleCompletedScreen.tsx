@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
-import { Trophy, Star, ArrowRight, Edit, CheckCircle2 } from 'lucide-react';
+import { Trophy, Star, ArrowRight, Edit, CheckCircle2, TrendingUp, Target } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface MissionAnswer {
@@ -14,6 +14,12 @@ interface ModuleCompletedScreenProps {
   moduleTitle: string;
   xpGained: number;
   badgeLabel: string;
+  level: number;
+  xp: number;
+  nextLevelXp: number;
+  overallProgress: number;
+  completedMissions: number;
+  totalMissions: number;
   isLastModule?: boolean;
   answers: MissionAnswer[];
   onEditAnswer: (missionId: string) => void;
@@ -25,20 +31,30 @@ export function ModuleCompletedScreen({
   moduleTitle, 
   xpGained, 
   badgeLabel, 
+  level,
+  xp,
+  nextLevelXp,
+  overallProgress,
+  completedMissions,
+  totalMissions,
   isLastModule = false,
   answers,
   onEditAnswer,
   onNext,
   onNextModule
 }: ModuleCompletedScreenProps) {
+  const safeProgress = Math.min(100, Math.max(0, overallProgress));
+  const remainingProgress = Math.max(0, 100 - safeProgress);
+  const xpToNextLevel = Math.max(0, nextLevelXp - xp);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7] flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7] flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-4xl">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center"
+          className="bg-white rounded-3xl shadow-2xl p-6 text-center sm:p-8 md:p-10"
         >
           {/* Ícone de Conquista */}
           <motion.div
@@ -68,6 +84,69 @@ export function ModuleCompletedScreen({
           >
             {moduleTitle}
           </motion.p>
+
+          <motion.div
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.43 }}
+            className="mb-8 grid gap-4 md:grid-cols-[0.9fr_1.1fr]"
+          >
+            <div className="rounded-2xl border-2 border-[#B2C9BF] bg-[#f5faf7] p-5 text-left">
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#052254] to-[#0A5740]">
+                    <TrendingUp className="h-5 w-5 text-white" />
+                  </span>
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0A5740]">Seu progresso</div>
+                    <div className="text-2xl font-bold text-[#052254]">Nível {level}</div>
+                  </div>
+                </div>
+                <Badge type="award" label={badgeLabel} color="green" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-white p-4">
+                  <div className="text-xs font-semibold text-gray-500">XP total</div>
+                  <div className="mt-1 text-2xl font-bold text-[#329314]">{xp}</div>
+                </div>
+                <div className="rounded-xl bg-white p-4">
+                  <div className="text-xs font-semibold text-gray-500">Próximo nível</div>
+                  <div className="mt-1 text-2xl font-bold text-[#052254]">
+                    {xpToNextLevel === 0 ? 'Agora!' : `${xpToNextLevel} XP`}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border-2 border-[#7CAF70] bg-gradient-to-br from-[#e5f0ea] to-white p-5 text-left">
+              <div className="mb-4 flex items-start gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#329314] text-white">
+                  <Target className="h-5 w-5" />
+                </span>
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0A5740]">Plano completo</div>
+                  <div className="mt-1 text-3xl font-bold text-[#052254]">{safeProgress}% concluído</div>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {completedMissions} de {totalMissions} missões respondidas.
+                  </p>
+                </div>
+              </div>
+
+              <div className="h-3 overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#052254] via-[#0A5740] to-[#329314] transition-all duration-700"
+                  style={{ width: `${safeProgress}%` }}
+                />
+              </div>
+
+              <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-semibold leading-6 text-[#052254]">
+                {remainingProgress > 0
+                  ? `Faltam ${remainingProgress}% para chegar ao plano de negócios e se preparar para buscar até R$ 10.000 em microcrédito.`
+                  : 'Você chegou ao plano de negócios e já tem uma base melhor para se preparar para buscar microcrédito.'}
+              </p>
+            </div>
+          </motion.div>
 
           <motion.div
             initial={{ y: 16, opacity: 0 }}
@@ -105,12 +184,12 @@ export function ModuleCompletedScreen({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.5, type: "spring" }}
-            className="bg-gradient-to-r from-[#e5f0ea] to-[#e5f0ea] border-2 border-[#7CAF70] rounded-2xl p-6 mb-6"
+            className="bg-gradient-to-r from-[#e5f0ea] to-[#e5f0ea] border-2 border-[#7CAF70] rounded-2xl p-5 mb-6 sm:p-6"
           >
             <div className="flex items-center justify-center gap-3">
               <Star className="w-8 h-8 text-[#329314]" />
               <div className="text-left">
-                <div className="text-sm text-[#0A5740] font-medium">XP Ganho</div>
+                <div className="text-sm text-[#0A5740] font-medium">XP do módulo</div>
                 <div className="text-3xl font-bold text-[#329314]">+{xpGained} XP</div>
               </div>
             </div>

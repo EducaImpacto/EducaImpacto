@@ -21,55 +21,55 @@ export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthCli
           className="flex shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
           aria-label="Ir para a página inicial"
         >
-          <BrandLogo />
+          <BrandLogo compact />
         </button>
 
-        <nav className="flex shrink-0 items-center gap-1 sm:gap-2" aria-label="Navegação principal">
+        <nav className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2" aria-label="Navegação principal">
           <button
             type="button"
             onClick={onHome}
-            className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+            className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
           >
             <Home className="h-4 w-4" />
-            <span>Home</span>
+            <span className="hidden sm:inline">Home</span>
           </button>
 
           <button
             type="button"
             onClick={onAbout}
-            className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+            className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
           >
             <Info className="h-4 w-4" />
-            <span>Quem somos</span>
+            <span className="hidden sm:inline">Quem somos</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenModules}
-            className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+            className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
           >
             <LayoutGrid className="h-4 w-4" />
-            <span>Módulos</span>
+            <span className="hidden sm:inline">Módulos</span>
           </button>
 
           {userEmail ? (
             <button
               type="button"
               onClick={onSignOut}
-              className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+              className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
               title={userEmail}
             >
               <LogOut className="h-4 w-4" />
-              <span>Sair</span>
+              <span className="hidden sm:inline">Sair</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={onAuthClick}
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-[#052254] px-3 text-sm font-semibold text-white transition-colors hover:bg-[#06173C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2"
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-[#052254] px-2 text-sm font-semibold text-white transition-colors hover:bg-[#06173C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
             >
               <UserRound className="h-4 w-4" />
-              <span>Entrar</span>
+              <span className="hidden sm:inline">Entrar</span>
             </button>
           )}
         </nav>
