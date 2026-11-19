@@ -6,3 +6,5 @@
   --app-build-marker: 20260727;
   min-height: 100vh;
 }
+
+button:enabled, a[href], [role="button"]:not([aria-disabled="true"]) { cursor: pointer; }

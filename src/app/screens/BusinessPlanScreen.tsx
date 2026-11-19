@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
-import { CheckCircle2, Edit, FileDown, Loader2, MessageSquare, Share2, Star } from 'lucide-react';
+import { CheckCircle2, FileDown, Loader2, MessageSquare, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { DiagnosticData } from './DiagnosticScreen';
 
@@ -43,14 +43,12 @@ interface BusinessPlanScreenProps {
   answers: MissionAnswer[];
   moduleAnswerTargets: ModuleAnswerTarget[];
   onDownload: () => void;
-  onEditAnswer: (missionId: string) => void;
-  onShare: () => void;
   onBackToDashboard: () => void;
   generationStatus?: BusinessPlanGenerationStatus;
   generatedPlan?: GeneratedBusinessPlanContent;
 }
 
-const planSections = [
+export const planSections = [
   {
     title: 'Sumário Executivo',
     blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
@@ -64,7 +62,7 @@ const planSections = [
     generatedField: 'businessDescription' as const,
   },
   {
-    title: 'Público-Alvo e Mercado',
+    title: 'Análise de mercado e público-alvo',
     blocks: ['Cliente e mercado'],
     description: 'Perfil de cliente, contexto de compra, canais de acesso e cenário de mercado inicial.',
     generatedField: 'targetAudienceAndMarket' as const,
@@ -82,19 +80,19 @@ const planSections = [
     generatedField: 'solutionAndValueProposition' as const,
   },
   {
-    title: 'Operação',
+    title: 'Plano operacional',
     blocks: ['Operação básica'],
     description: 'Primeiros processos, recursos, estrutura necessária e forma de entrega.',
     generatedField: 'operationsPlan' as const,
   },
   {
-    title: 'Marketing e Vendas',
+    title: 'Plano de marketing e vendas',
     blocks: ['Canais de venda e aquisição', 'Cliente e mercado', 'Crescimento'],
     description: 'Canais para encontrar clientes, comunicar a oferta e iniciar as primeiras vendas.',
     generatedField: 'marketingAndSalesPlan' as const,
   },
   {
-    title: 'Financeiro Inicial',
+    title: 'Plano financeiro',
     blocks: ['Custos', 'Receita'],
     description: 'Principais custos, fontes de receita e pontos que precisam de validação financeira.',
     generatedField: 'financialOverview' as const,
@@ -127,13 +125,15 @@ function buildProfessionalDraft(sectionTitle: string, description: string, answe
   return `${description} Com base nas informações fornecidas, esta seção deve considerar: ${sourceText}`;
 }
 
+export function isCompletePlan(plan?: GeneratedBusinessPlanContent) {
+  return planSections.every(({ generatedField }) => typeof plan?.[generatedField] === "string" && plan[generatedField].trim().length > 0);
+}
+
 export function BusinessPlanScreen({
   diagnosticData,
   answers,
   moduleAnswerTargets,
   onDownload,
-  onEditAnswer,
-  onShare,
   onBackToDashboard,
   generationStatus = 'idle',
   generatedPlan,
@@ -159,24 +159,25 @@ export function BusinessPlanScreen({
     });
   }, [answers, generatedPlan]);
 
+  const ready = generationStatus === "generated" && isCompletePlan(generatedPlan);
   const activeSection = answersBySection[activeSectionIndex] ?? answersBySection[0];
   const activeSectionAnswerCount = activeSection?.answers.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7]">
+    <div className="min-h-screen bg-[#f5faf7]">
       <div className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="mb-6 overflow-hidden rounded-lg bg-white shadow-xl sm:mb-8"
+          className="mb-6 overflow-hidden rounded-lg bg-white shadow-sm sm:mb-8"
         >
-          <div className="bg-gradient-to-r from-[#329314] via-[#0A5740] to-[#329314] px-4 py-8 text-center sm:px-8 sm:py-10 lg:py-12">
+          <div className="bg-[#052254] px-4 py-8 text-center sm:px-8 sm:py-10 lg:py-12">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg sm:h-20 sm:w-20 lg:h-24 lg:w-24"
+              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm sm:h-20 sm:w-20 lg:h-24 lg:w-24"
             >
               <CheckCircle2 className="h-8 w-8 text-[#329314] sm:h-10 sm:w-10 lg:h-12 lg:w-12" />
             </motion.div>
@@ -187,7 +188,7 @@ export function BusinessPlanScreen({
               transition={{ delay: 0.3 }}
               className="mx-auto mb-3 max-w-4xl text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl"
             >
-              Plano de Negócios concluído
+              {ready ? "Plano de Negócios concluído" : "Prévia do plano de negócios"}
             </motion.h1>
 
             <motion.p
@@ -196,7 +197,7 @@ export function BusinessPlanScreen({
               transition={{ delay: 0.4 }}
               className="mx-auto mb-5 max-w-4xl text-base leading-relaxed text-[#e5f0ea] sm:text-lg lg:text-xl"
             >
-              A IA organizou suas respostas em uma estrutura profissional para apresentar e validar sua ideia.
+              {ready ? "Seu plano de negócios está pronto para consultar e baixar." : "O PDF ficará disponível quando a IA concluir todas as seções."}
             </motion.p>
 
             <motion.div
@@ -207,7 +208,7 @@ export function BusinessPlanScreen({
             >
               <Badge type="trophy" label="Jornada Completa" color="green" />
               <Badge type="star" label={`Perfil: ${profileLabels[diagnosticData.nivel]}`} color="orange" />
-              <Badge type="zap" label="Insígnia: Plano Concluído" color="blue" />
+              {ready && <Badge type="zap" label="Insígnia: Plano Concluído" color="blue" />}
             </motion.div>
           </div>
 
@@ -215,10 +216,7 @@ export function BusinessPlanScreen({
             <div className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8">
               <div className="min-w-0">
                 <h2 className="mb-3 text-xl font-bold text-gray-900 sm:text-2xl">Plano profissional estruturado</h2>
-                <p className="mb-5 max-w-4xl text-sm leading-relaxed text-gray-600 sm:text-base">
-                  Esta versão prepara a estrutura oficial que a IA deverá preencher e refinar. Por enquanto,
-                  o texto usa suas respostas como base de rascunho para validar o formato do plano.
-                </p>
+
 
                 {(generationStatus === 'polling') && (
                   <div className="mb-5 flex items-start gap-3 rounded-lg border border-[#B2C9BF] bg-[#f5faf7] p-4 text-sm text-[#052254]">
@@ -226,10 +224,10 @@ export function BusinessPlanScreen({
                     <span>Gerando a versão profissional do plano com IA. Isso pode levar até alguns minutos.</span>
                   </div>
                 )}
-                {generationStatus === 'generated' && (
+                {ready && (
                   <div className="mb-5 flex items-start gap-3 rounded-lg border border-[#329314]/40 bg-[#e5f0ea] p-4 text-sm text-[#0A5740]">
                     <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                    <span>Plano profissional gerado com IA. As seções abaixo já refletem o conteúdo revisado.</span>
+                    <span>Plano disponível para consulta e exportação.</span>
                   </div>
                 )}
                 {(generationStatus === 'failed' || generationStatus === 'timeout') && (
@@ -239,6 +237,9 @@ export function BusinessPlanScreen({
                   </div>
                 )}
 
+                {ready && (
+                  <Button className="mb-5" onClick={onDownload}><FileDown className="mr-2 inline h-5 w-5" />Exportar PDF para impressão · R$ 29,90</Button>
+                )}
                 <div className="mb-5 rounded-lg border border-gray-200 bg-white/90 p-3 shadow-sm backdrop-blur-sm">
                   <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -267,7 +268,7 @@ export function BusinessPlanScreen({
                           onClick={() => setActiveSectionIndex(index)}
                           className={`min-w-[160px] rounded-lg px-3 py-3 text-left transition-all sm:min-w-[180px] sm:px-4 ${
                             isActive
-                              ? 'bg-[#052254] text-white shadow-md'
+                              ? 'bg-[#052254] text-white shadow-sm'
                               : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                           }`}
                         >
@@ -289,11 +290,7 @@ export function BusinessPlanScreen({
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-bold text-gray-900">{activeSection.title}</h3>
-                            {activeSection.isAiGenerated && (
-                              <span className="rounded-full bg-[#e5f0ea] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#0A5740]">
-                                Gerado com IA
-                              </span>
-                            )}
+
                           </div>
                           <p className="text-sm text-gray-600">{activeSection.description}</p>
                         </div>
@@ -310,7 +307,7 @@ export function BusinessPlanScreen({
                     {activeSection.generatedField === 'risksAndMitigations' && generatedPlan?.nextSteps?.length ? (
                       <div className="mt-4 rounded-lg border border-gray-200 p-4">
                         <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-                          Próximos passos sugeridos pela IA
+                          Próximos passos
                         </p>
                         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700">
                           {generatedPlan.nextSteps.map((step, index) => (
@@ -330,14 +327,7 @@ export function BusinessPlanScreen({
                             <div className="text-sm font-semibold text-[#052254]">
                               {answer.missionTitle}
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => onEditAnswer(answer.missionId)}
-                              className="inline-flex items-center gap-1 text-xs font-semibold text-[#052254] hover:text-[#06173C]"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                              Editar
-                            </button>
+
                           </div>
                           <p className="text-sm text-gray-700">{answer.answer}</p>
                         </div>
@@ -398,7 +388,7 @@ export function BusinessPlanScreen({
                   </p>
                   <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#052254] to-[#329314]"
+                      className="h-full bg-[#0A5740]"
                       style={{ width: `${Math.min(100, (new Set(answers.flatMap((answer) => answer.planBlocks)).size / 10) * 100)}%` }}
                     />
                   </div>
@@ -406,22 +396,7 @@ export function BusinessPlanScreen({
               </aside>
             </div>
 
-            <div className="mb-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
-              <Button variant="primary" size="lg" className="w-full" onClick={onDownload}>
-                <FileDown className="w-5 h-5 mr-2 inline" />
-                Baixar PDF
-              </Button>
 
-              <Button variant="outline" size="lg" className="w-full" disabled>
-                <Edit className="w-5 h-5 mr-2 inline" />
-                Edite direto nos cards
-              </Button>
-
-              <Button variant="outline" size="lg" className="w-full" onClick={onShare}>
-                <Share2 className="w-5 h-5 mr-2 inline" />
-                Compartilhar
-              </Button>
-            </div>
 
             <div className="bg-[#f5faf7] border-l-4 border-[#052254] rounded-lg p-5">
               <p className="text-sm text-[#06173C]">
@@ -435,7 +410,7 @@ export function BusinessPlanScreen({
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="mb-8 rounded-lg bg-white p-4 shadow-lg sm:p-6 lg:p-8"
+          className="mb-8 rounded-lg bg-white p-4 shadow-sm sm:p-6 lg:p-8"
         >
           <div className="mb-6 flex items-center gap-3">
             <MessageSquare className="w-6 h-6 text-[#052254]" />

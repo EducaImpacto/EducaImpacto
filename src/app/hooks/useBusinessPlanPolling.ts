@@ -35,7 +35,8 @@ export function useBusinessPlanPolling(businessPlanId: string | null) {
     const poll = async () => {
       try {
         const row = await getBusinessPlan(businessPlanId);
-        if (cancelled || !row) return;
+        if (cancelled) return;
+        if (!row) { setStatus('failed'); return; }
 
         setPlan(row);
 
@@ -64,13 +65,15 @@ export function useBusinessPlanPolling(businessPlanId: string | null) {
         timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
       } catch (error) {
         console.error('Falha ao consultar status do plano de negocios:', error);
-        if (!cancelled) {
+        if (!cancelled && Date.now() - (startedAtRef.current ?? Date.now()) >= POLL_TIMEOUT_MS) setStatus('timeout');
+        else if (!cancelled) {
           timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
         }
       }
     };
 
-    let timeoutId = setTimeout(poll, POLL_INTERVAL_MS);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    void poll();
 
     return () => {
       cancelled = true;

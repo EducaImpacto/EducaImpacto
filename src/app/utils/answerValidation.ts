@@ -1,3 +1,5 @@
+import { isUnsafeProposal, safetyMessage } from '../../../supabase/functions/_shared/planSafety';
+
 export function getAnswerValidationMessage(answer: string): string | null {
   const trimmed = answer.trim();
   const letters = trimmed.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) ?? [];
@@ -7,6 +9,7 @@ export function getAnswerValidationMessage(answer: string): string | null {
     .filter((word) => word.length >= 2);
   const uniqueLetters = new Set(letters.map((letter) => letter.toLowerCase()));
 
+  if (isUnsafeProposal(trimmed)) return safetyMessage;
   if (!trimmed) return 'Escreva uma resposta para continuar.';
   if (letters.length < 12 || words.length < 3) {
     return 'Responda com uma frase curta e concreta, usando pelo menos algumas palavras.';

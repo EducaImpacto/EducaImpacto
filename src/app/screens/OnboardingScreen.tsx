@@ -15,11 +15,11 @@ export function OnboardingScreen({ profileType, onBackToLanding, onOpenModules, 
   const isBeginner = profileType === 'iniciante';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f5faf7] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+        <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-[#052254] to-[#0A5740] rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-[#052254] rounded-full flex items-center justify-center mx-auto mb-6">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -34,7 +34,7 @@ export function OnboardingScreen({ profileType, onBackToLanding, onOpenModules, 
 
           <div className="grid grid-cols-4 gap-2 mb-8">
             {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="h-3 rounded-full bg-gradient-to-r from-[#052254] to-[#329314]" />
+              <div key={item} className="h-3 rounded-full bg-[#0A5740]" />
             ))}
           </div>
 
@@ -80,7 +80,7 @@ export function OnboardingScreen({ profileType, onBackToLanding, onOpenModules, 
             </div>
           </div>
 
-          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-8 flex items-center gap-3 text-gray-600">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8 flex items-center gap-3 text-gray-600">
             <PauseCircle className="w-5 h-5 text-[#052254] flex-shrink-0" />
             <p className="text-sm">Você pode pausar quando quiser. O importante é avançar com clareza, uma missão por vez.</p>
           </div>

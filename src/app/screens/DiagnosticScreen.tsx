@@ -27,10 +27,10 @@ const BLOCO_PERFIL = [
     bloco: 'Sobre você',
     pergunta: 'Qual é o seu principal objetivo?',
     opcoes: [
-      { value: 'primeiro-negocio', label: 'Criar meu primeiro negócio', icon: '🚀' },
-      { value: 'aprender', label: 'Aprender mais sobre empreendedorismo', icon: '📚' },
-      { value: 'validar', label: 'Validar uma ideia', icon: '💡' },
-      { value: 'projetos-clientes', label: 'Desenvolver projetos para mim ou para clientes', icon: '🎯' },
+      { value: 'primeiro-negocio', label: 'Criar meu primeiro negócio' },
+      { value: 'aprender', label: 'Aprender mais sobre empreendedorismo' },
+      { value: 'validar', label: 'Validar uma ideia' },
+      { value: 'projetos-clientes', label: 'Desenvolver projetos para mim ou para clientes' },
     ],
   },
   {
@@ -38,10 +38,10 @@ const BLOCO_PERFIL = [
     bloco: 'Sobre você',
     pergunta: 'Você já teve alguma experiência com empreendedorismo?',
     opcoes: [
-      { value: 'zero', label: 'Estou começando do zero', icon: '🌱' },
-      { value: 'algum-conhecimento', label: 'Tenho algum conhecimento sobre negócios', icon: '📖' },
-      { value: 'ja-tive', label: 'Já tive um negócio / Já trabalhei com negócios', icon: '🏪' },
-      { value: 'trabalho-hoje', label: 'Trabalho com isso hoje', icon: '🏢' },
+      { value: 'zero', label: 'Estou começando do zero' },
+      { value: 'algum-conhecimento', label: 'Tenho algum conhecimento sobre negócios' },
+      { value: 'ja-tive', label: 'Já tive um negócio / Já trabalhei com negócios' },
+      { value: 'trabalho-hoje', label: 'Trabalho com isso hoje' },
     ],
   },
 ];
@@ -52,10 +52,10 @@ const BLOCO_MATURIDADE = [
     bloco: 'Sobre conhecimento',
     pergunta: 'Se tivesse que montar um plano de negócios hoje:',
     opcoes: [
-      { value: 'nao-saberia', label: 'Não saberia como começar', icon: '😅' },
-      { value: 'precisaria-ajuda', label: 'Precisaria de ajuda', icon: '🤝' },
-      { value: 'com-dificuldade', label: 'Conseguiria, com alguma dificuldade', icon: '💪' },
-      { value: 'com-seguranca', label: 'Faria com segurança', icon: '✅' },
+      { value: 'nao-saberia', label: 'Não saberia como começar' },
+      { value: 'precisaria-ajuda', label: 'Precisaria de ajuda' },
+      { value: 'com-dificuldade', label: 'Conseguiria, com alguma dificuldade' },
+      { value: 'com-seguranca', label: 'Faria com segurança' },
     ],
   },
   {
@@ -63,10 +63,10 @@ const BLOCO_MATURIDADE = [
     bloco: 'Sobre conhecimento',
     pergunta: 'Você já utilizou alguma ferramenta ou metodologia para planejar negócios?',
     opcoes: [
-      { value: 'nunca', label: 'Nunca', icon: '🙅' },
-      { value: 'superficialmente', label: 'Superficialmente', icon: '👀' },
-      { value: 'algumas-vezes', label: 'Algumas vezes', icon: '🔄' },
-      { value: 'frequentemente', label: 'Frequentemente', icon: '⚡' },
+      { value: 'nunca', label: 'Nunca' },
+      { value: 'superficialmente', label: 'Superficialmente' },
+      { value: 'algumas-vezes', label: 'Algumas vezes' },
+      { value: 'frequentemente', label: 'Frequentemente' },
     ],
   },
   {
@@ -74,10 +74,10 @@ const BLOCO_MATURIDADE = [
     bloco: 'Sobre conhecimento',
     pergunta: 'Qual sua experiência com plano de negócios?',
     opcoes: [
-      { value: 'nunca-contato', label: 'Nunca tive contato', icon: '🔰' },
-      { value: 'estudei-pouco', label: 'Estudei um pouco sobre o assunto', icon: '📝' },
-      { value: 'participei', label: 'Já participei da construção', icon: '🔨' },
-      { value: 'desenvolvo', label: 'Desenvolvo com frequência', icon: '🏆' },
+      { value: 'nunca-contato', label: 'Nunca tive contato' },
+      { value: 'estudei-pouco', label: 'Estudei um pouco sobre o assunto' },
+      { value: 'participei', label: 'Já participei da construção' },
+      { value: 'desenvolvo', label: 'Desenvolvo com frequência' },
     ],
   },
 ];
@@ -107,26 +107,20 @@ function classificarNivel(respostas: Record<string, string>): TrailLevel {
 // ─── Resultado por nível ─────────────────────────────────────────────────────
 const RESULTADO_NIVEL = {
   iniciante: {
-    emoji: '🚀',
-    titulo: 'Você está começando sua jornada empreendedora!',
+    titulo: 'Você está começando sua jornada empreendedora.',
     desc: 'Vamos te guiar passo a passo para construir seu negócio.',
-    cor: 'from-[#052254] to-[#0A5740]',
     badge: 'Trilha Iniciante',
     xp: 50,
   },
   intermediario: {
-    emoji: '⚡',
-    titulo: 'Você já tem alguma base sobre negócios!',
+    titulo: 'Você já tem alguma base sobre negócios.',
     desc: 'Vamos aprofundar o que você já sabe e estruturar seu plano.',
-    cor: 'from-[#329314] to-[#0A5740]',
     badge: 'Trilha Intermediária',
     xp: 75,
   },
   avancado: {
-    emoji: '🏆',
-    titulo: 'Você já tem experiência com negócios!',
+    titulo: 'Você já tem experiência com negócios.',
     desc: 'Vamos direto ao desenvolvimento do plano de negócios.',
-    cor: 'from-[#329314] to-[#0A5740]',
     badge: 'Trilha Avançada',
     xp: 100,
   },
@@ -192,24 +186,15 @@ const handleVoltar = () => {
   if (step === totalPerguntas && nivel) {
     const resultado = RESULTADO_NIVEL[nivel];
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-white to-[#f5faf7] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f5f8f7] flex items-center justify-center p-4">
         <div className="max-w-lg w-full">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-3xl shadow-2xl overflow-hidden"
+            className="bg-white rounded-lg border border-[#d8e7df] overflow-hidden"
           >
-            {/* Header colorido */}
-            <div className={`bg-gradient-to-r ${resultado.cor} px-8 py-10 text-center text-white`}>
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="text-6xl mb-4"
-              >
-                {resultado.emoji}
-              </motion.div>
+            <div className="bg-[#052254] px-6 py-8 text-white sm:px-8">
               <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
                 <CheckCircle2 className="w-4 h-4" />
                 Perfil do Empreendedor identificado
@@ -261,7 +246,7 @@ const handleVoltar = () => {
               <button
                 type="button"
                 onClick={handleVoltar}
-                className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-2xl transition-all duration-150 text-sm"
+                className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-lg transition-all duration-150 text-sm"
               >
                 <ArrowLeft className="w-4 h-4" />
                 {step === 0 ? "Voltar à página inicial" : "Voltar pergunta"}
@@ -269,7 +254,7 @@ const handleVoltar = () => {
 
               <button
                 onClick={handleContinuar}
-                className="w-full flex items-center justify-center gap-2 bg-[#052254] hover:bg-[#06173C] text-white font-bold py-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-base"
+                className="w-full flex items-center justify-center gap-2 bg-[#052254] hover:bg-[#06173C] text-white font-bold py-4 rounded-lg transition-all duration-200 shadow-sm text-base"
               >
                 Ver minha trilha
                 <ChevronRight className="w-5 h-5" />
@@ -283,7 +268,7 @@ const handleVoltar = () => {
 
   // ── Telas de perguntas ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-white to-[#f5faf7] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f5f8f7] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
 
         {/* Header */}
@@ -308,7 +293,7 @@ const handleVoltar = () => {
           </div>
           <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-[#052254] to-[#7CAF70] rounded-full"
+              className="h-full bg-[#0A5740] rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progresso}%` }}
               transition={{ duration: 0.3 }}
@@ -323,7 +308,7 @@ const handleVoltar = () => {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -24, opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="bg-white rounded-3xl shadow-xl p-8 mb-6"
+          className="bg-white rounded-lg shadow-sm p-8 mb-6"
         >
           {/* Label do bloco */}
           <div className="text-xs font-bold text-[#052254] uppercase tracking-widest mb-3">
@@ -338,20 +323,19 @@ const handleVoltar = () => {
             {perguntaAtual.opcoes.map((opcao) => (
               <button
                 key={opcao.value}
+                aria-pressed={respostaAtual === opcao.value}
                 onClick={() => handleSelecionar(opcao.value)}
                 className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-150 flex items-center gap-3 ${
                   respostaAtual === opcao.value
-                    ? 'border-[#052254] bg-[#f5faf7] shadow-md'
+                    ? 'border-[#052254] bg-[#f5faf7] shadow-sm'
                     : 'border-gray-200 hover:border-[#B2C9BF] hover:bg-gray-50'
                 }`}
               >
-                <span className="text-2xl flex-shrink-0">{opcao.icon}</span>
+                <span aria-hidden="true" className={`size-4 shrink-0 rounded-full border ${respostaAtual === opcao.value ? "border-[5px] border-[#0A5740]" : "border-[#82948b]"}`} />
                 <span className={`font-medium ${respostaAtual === opcao.value ? 'text-[#06173C]' : 'text-gray-800'}`}>
                   {opcao.label}
                 </span>
-                {respostaAtual === opcao.value && (
-                  <CheckCircle2 className="w-5 h-5 text-[#052254] ml-auto flex-shrink-0" />
-                )}
+
               </button>
             ))}
           </div>
@@ -362,7 +346,7 @@ const handleVoltar = () => {
           <button
             type="button"
             onClick={handleVoltar}
-            className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-2xl transition-all duration-150 text-sm"
+            className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-lg transition-all duration-150 text-sm"
           >
             <ChevronLeft className="w-4 h-4" />
             {step === 0 ? "Voltar à página inicial" : "Voltar pergunta"}
@@ -371,7 +355,7 @@ const handleVoltar = () => {
           <button
             onClick={handleProximo}
             disabled={!respostaAtual}
-            className="w-full flex items-center justify-center gap-2 bg-[#052254] hover:bg-[#06173C] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all duration-150 shadow hover:shadow-md text-base"
+            className="w-full flex items-center justify-center gap-2 bg-[#052254] hover:bg-[#06173C] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 rounded-lg transition-all duration-150 shadow hover:shadow-sm text-base"
           >
             {step === totalPerguntas - 1 ? "Ver meu resultado" : "Próxima"}
             <ChevronRight className="w-5 h-5" />
@@ -379,7 +363,7 @@ const handleVoltar = () => {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-5">
-          🔒 Suas respostas são usadas apenas para personalizar sua jornada
+          Suas respostas são usadas apenas para personalizar sua jornada
         </p>
       </div>
     </div>

@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Button } from './components/Button';
 import { LandingPage } from './screens/LandingPage';
 import { AboutScreen } from './screens/AboutScreen';
 import { DiagnosticScreen } from './screens/DiagnosticScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { MissionScreen } from './screens/MissionScreen';
 import { ModuleCompletedScreen } from './screens/ModuleCompletedScreen';
-import { BusinessPlanScreen } from './screens/BusinessPlanScreen';
+import { BusinessPlanScreen, isCompletePlan } from './screens/BusinessPlanScreen';
 import type { GeneratedBusinessPlanContent } from './screens/BusinessPlanScreen';
 import { DashboardScreen } from './screens/DashboardScreen';
 import type { BusinessPlanHistoryItem } from './screens/DashboardScreen';
@@ -14,10 +15,12 @@ import { AppFooter } from './components/AppFooter';
 import { AuthModal } from './components/AuthModal';
 import { DiagnosticData } from './screens/DiagnosticScreen';
 import { isAdequateAnswer } from './utils/answerValidation';
+import { hasUnsafePlanText, isUnsafeProposal, safetyMessage } from '../../supabase/functions/_shared/planSafety';
 import { supabase } from './lib/supabase';
 import {
   createBusinessPlanSnapshot,
-  getOrCreateDefaultBusinessProject,
+  createBusinessProject,
+  getUserBusinessProjects,
   getProjectBusinessPlans,
   getProjectDiagnostic,
   getProjectMissionAnswers,
@@ -31,6 +34,8 @@ import type { User } from '@supabase/supabase-js';
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 type Screen =
+  | 'payment'
+  | 'start'
   | 'landing'
   | 'about'
   | 'diagnostic'
@@ -269,6 +274,8 @@ const DEFAULT_DIAGNOSTIC_DATA: DiagnosticData = {
 };
 
 interface PersistedState {
+  projectId: string | null;
+  ownerId: string | null;
   screen: Screen;
   diagnosticData: DiagnosticData | null;
   etapaIndex: number;
@@ -374,54 +381,46 @@ function getModuleXp(etapa: Etapa) {
   return etapa.missions.reduce((acc, mission) => acc + mission.xpReward, 0);
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+const paths: Record<Screen, string> = {
+  landing: '/', start: '/comecar', about: '/quem-somos', diagnostic: '/diagnostico',
+  onboarding: '/trilha', dashboard: '/modulos', mission: '/missao',
+  'etapa-concluida': '/modulo-concluido', 'business-plan': '/plano', payment: '/pagamento',
+};
+const initialUrl = new URL(window.location.href);
+const initialScreen = (Object.keys(paths) as Screen[]).find(key => paths[key] === (initialUrl.pathname.replace(/\/$/, '') || '/')) ?? 'landing';
+function routeUrl(state: NavigationState, plan: string | null) {
+  const url = new URL(paths[state.screen], location.origin);
+  if (state.screen === 'mission' || state.screen === 'etapa-concluida') {
+    url.searchParams.set('modulo', String(state.etapaIndex + 1));
+    url.searchParams.set('pergunta', String(state.missaoIndex + 1));
+  }
+  if (plan && ['business-plan','payment'].includes(state.screen)) url.searchParams.set('id', plan);
+  return url.pathname + url.search;
 }
 
-function renderPdfParagraphs(value: string) {
-  return value
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean)
-    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br />')}</p>`)
-    .join('');
-}
-
-function renderPdfList(items: string[] | undefined) {
-  if (!items?.length) return '';
-
-  return `
-    <ol class="next-steps">
-      ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-    </ol>
-  `;
-}
-
-// ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const persistedState = useMemo(() => readPersistedState(), []);
   const isRestoringHistory = useRef(false);
   const lastHistoryKey = useRef('');
   const remoteSyncStarted = useRef(false);
-  const [screen, setScreen] = useState<Screen>(persistedState?.screen ?? 'landing');
+  const [screen, setScreen] = useState<Screen>(initialScreen);
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<{id: string; name: string}[]>([]);
+  const [selectedProject, selectProject] = useState<string | null>(null);
+  const [projectBusy, setProjectBusy] = useState(false);
+  const [actionMessage, setActionMessage] = useState('');
   const [syncMessage, setSyncMessage] = useState('');
   const [isPreparingPlan, setIsPreparingPlan] = useState(false);
   const [businessPlanHistory, setBusinessPlanHistory] = useState<BusinessPlanHistoryItem[]>([]);
-  const [activeBusinessPlanId, setActiveBusinessPlanId] = useState<string | null>(null);
+  const [activeBusinessPlanId, setActiveBusinessPlanId] = useState<string | null>(initialUrl.searchParams.get('id'));
   const [planGenerationError, setPlanGenerationError] = useState(false);
   const [planGenerationStarted, setPlanGenerationStarted] = useState(false);
-  const { status: planGenerationStatus, plan: generatedBusinessPlan } = useBusinessPlanPolling(activeBusinessPlanId);
+  const { status: planGenerationStatus, plan: generatedBusinessPlan } = useBusinessPlanPolling(authUser ? activeBusinessPlanId : null);
 
   useEffect(() => {
     window.scrollTo({
@@ -434,8 +433,8 @@ export default function App() {
   const [editReturnScreen, setEditReturnScreen] = useState<EditReturnScreen>('business-plan');
 
   // Progresso na trilha
-  const [etapaIndex, setEtapaIndex] = useState(persistedState?.etapaIndex ?? 0);   // 0..3
-  const [missaoIndex, setMissaoIndex] = useState(persistedState?.missaoIndex ?? 0); // 0..4 dentro da etapa
+  const [etapaIndex, setEtapaIndex] = useState(Number(initialUrl.searchParams.get('modulo') || 1) - 1);   // 0..3
+  const [missaoIndex, setMissaoIndex] = useState(Number(initialUrl.searchParams.get('pergunta') || 1) - 1); // 0..4 dentro da etapa
   const [respostas, setRespostas] = useState<Record<number, string>>(persistedState?.respostas ?? {}); // missionId → resposta
 
   // Gamificação
@@ -453,7 +452,20 @@ export default function App() {
       setAuthUser(session?.user ?? null);
       if (!session?.user) {
         setActiveProjectId(null);
+        setProjects([]);
+        selectProject(null);
         setBusinessPlanHistory([]);
+        if (_event === 'SIGNED_OUT' || persistedState?.ownerId) {
+          setRespostas({});
+          setXp(0);
+          setDiagnosticData(null);
+          setProjectBusy(false);
+          if (_event === 'SIGNED_OUT') {
+            setActiveBusinessPlanId(null);
+            setScreen('landing');
+            localStorage.removeItem(STORAGE_KEY);
+          }
+        }
         remoteSyncStarted.current = false;
       }
     });
@@ -494,11 +506,20 @@ export default function App() {
 
     let isMounted = true;
 
-    getOrCreateDefaultBusinessProject()
+    remoteSyncStarted.current = false;
+    setProjectBusy(true);
+    getUserBusinessProjects().then(async rows => {
+      const options = rows.filter(p => p.status !== 'archived');
+      if (!options.length) options.push(await createBusinessProject({name: 'Meu negócio', status:'in_progress'}));
+      if (isMounted) setProjects(options);
+      const preferred = selectedProject ?? localStorage.getItem('educa-project:' + authUser.id);
+      return options.find(p => p.id === preferred) ?? options[0];
+    })
       .then(async (project) => {
         if (!isMounted) return;
 
-        setActiveProjectId(project.id);
+        const sameCache = !selectedProject && persistedState?.ownerId === authUser.id && persistedState?.projectId === project.id;
+        const importGuest = !selectedProject && !persistedState?.ownerId && !activeProjectId;
 
         const [remoteDiagnostic, remoteAnswers, remotePlans] = await Promise.all([
           getProjectDiagnostic(project.id),
@@ -508,14 +529,15 @@ export default function App() {
 
         if (!isMounted) return;
 
-        if (!diagnosticData && remoteDiagnostic?.answers && typeof remoteDiagnostic.answers === 'object') {
+        if (remoteDiagnostic?.answers && typeof remoteDiagnostic.answers === 'object') {
           setDiagnosticData({
             ...(remoteDiagnostic.answers as Partial<DiagnosticData>),
             nivel: remoteDiagnostic.profile_level,
           } as DiagnosticData);
         }
 
-        if (Object.keys(respostas).length === 0 && remoteAnswers.length > 0) {
+        else if (!importGuest && !sameCache) setDiagnosticData(null);
+        if (remoteAnswers.length || (!importGuest && !sameCache)) {
           setRespostas(
             remoteAnswers.reduce<Record<number, string>>((acc, answer) => {
               acc[answer.mission_id] = answer.answer;
@@ -534,10 +556,21 @@ export default function App() {
           }))
         );
 
+        if (!sameCache && !importGuest || remoteAnswers.length) {
+          const answered = new Set(remoteAnswers.filter(a => isAdequateAnswer(a.answer)).map(a => a.mission_id));
+          setXp(ETAPAS.flatMap(e => e.missions).reduce((sum,m) => sum + (answered.has(m.id) ? m.xpReward : 0),0) + (answered.size === TOTAL_MISSIONS ? TRAIL_COMPLETION_BONUS_XP : 0));
+        }
+        setActiveProjectId(project.id);
+        localStorage.setItem('educa-project:' + authUser.id, project.id);
+        setProjectBusy(false);
         remoteSyncStarted.current = true;
         setSyncMessage('Progresso conectado ao Supabase.');
       })
       .catch((error) => {
+        if (!isMounted) return;
+        setProjectBusy(false);
+        setActiveProjectId(null);
+        setActionMessage('Não foi possível carregar o negócio. Recarregue a página para tentar novamente.');
         console.error('Nao foi possivel preparar projeto no Supabase.', error);
         setSyncMessage('Nao foi possivel conectar seu progresso ao Supabase agora.');
       });
@@ -545,7 +578,7 @@ export default function App() {
     return () => {
       isMounted = false;
     };
-  }, [authUser]);
+  }, [authUser?.id, selectedProject]);
 
   useEffect(() => {
     if (!activeProjectId || !diagnosticData || !remoteSyncStarted.current) return;
@@ -607,7 +640,9 @@ export default function App() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    if (projectBusy || (persistedState?.ownerId && !authUser)) return;
     const state: PersistedState = {
+      projectId: activeProjectId, ownerId: authUser?.id ?? null,
       screen,
       diagnosticData,
       etapaIndex,
@@ -618,7 +653,7 @@ export default function App() {
     };
 
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [diagnosticData, etapaIndex, missaoIndex, nivel, respostas, screen, xp]);
+  }, [diagnosticData, etapaIndex, missaoIndex, nivel, respostas, screen, xp, activeProjectId, authUser?.id, projectBusy]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -640,11 +675,12 @@ export default function App() {
       editReturnScreen,
     };
 
-    window.history.replaceState(initialState, '', window.location.href);
+    window.history.replaceState(initialState, '', routeUrl(initialState, activeBusinessPlanId));
     lastHistoryKey.current = JSON.stringify(initialState);
 
     const handlePopState = (event: PopStateEvent) => {
       if (!event.state) return;
+      setActiveBusinessPlanId(new URL(location.href).searchParams.get('id'));
       applyNavigationState(event.state as NavigationState);
     };
 
@@ -663,6 +699,7 @@ export default function App() {
       editReturnScreen,
     };
     const nextHistoryKey = JSON.stringify(navigationState);
+    const url = routeUrl(navigationState, activeBusinessPlanId);
 
     if (isRestoringHistory.current) {
       isRestoringHistory.current = false;
@@ -670,11 +707,11 @@ export default function App() {
       return;
     }
 
-    if (nextHistoryKey !== lastHistoryKey.current) {
-      window.history.pushState(navigationState, '', window.location.href);
+    if (nextHistoryKey !== lastHistoryKey.current || location.pathname + location.search !== url) {
+      window.history.pushState(navigationState, '', url);
       lastHistoryKey.current = nextHistoryKey;
     }
-  }, [editReturnScreen, editingMissionId, etapaIndex, missaoIndex, screen]);
+  }, [editReturnScreen, editingMissionId, etapaIndex, missaoIndex, screen, activeBusinessPlanId]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const etapaIndexSeguro = etapaIndex >= 0 && etapaIndex < ETAPAS.length ? etapaIndex : 0;
@@ -796,6 +833,7 @@ export default function App() {
   };
 
   const handleNextMission = (answer: string) => {
+    if (!isAdequateAnswer(answer)) return;
     if (editingMissionId !== null) {
       setRespostas((prev) => ({ ...prev, [editingMissionId]: answer }));
       setEditingMissionId(null);
@@ -840,432 +878,66 @@ export default function App() {
     setScreen('dashboard');
   };
 
-  const handleDownloadPlan = () => {
-    const generatedAt = new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date());
+  const blockedPlan = Boolean(activeBusinessPlanId && generatedBusinessPlan?.id === activeBusinessPlanId &&
+    (hasUnsafePlanText(generatedBusinessPlan.content) || hasUnsafePlanText(generatedBusinessPlan.generated_from)));
+  const generatedPlanContent = !blockedPlan && activeBusinessPlanId && generatedBusinessPlan?.id === activeBusinessPlanId && generatedBusinessPlan.status === "generated"
+    ? (generatedBusinessPlan.content as { generatedPlan?: GeneratedBusinessPlanContent } | null)?.generatedPlan
+    : undefined;
 
-    const professionalSections = [
-      {
-        title: '1. Sumário Executivo',
-        blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Proposta de valor'],
-        description: 'Síntese objetiva do negócio, da oportunidade identificada e da solução proposta.',
-        generatedField: 'executiveSummary' as const,
-      },
-      {
-        title: '2. Descrição do Negócio',
-        blocks: ['Empreendedor e contexto', 'Produto / Serviço', 'Operação básica'],
-        description: 'Apresentação do que será oferecido, como o negócio começa e quais recursos já existem.',
-        generatedField: 'businessDescription' as const,
-      },
-      {
-        title: '3. Público-Alvo e Mercado',
-        blocks: ['Cliente e mercado', 'Canais de venda e aquisição'],
-        description: 'Perfil do cliente, contexto de compra, canais de acesso e mercado inicial.',
-        generatedField: 'targetAudienceAndMarket' as const,
-      },
-      {
-        title: '4. Problema e Oportunidade',
-        blocks: ['Problema', 'Cliente e mercado'],
-        description: 'Dor principal do cliente e oportunidade que justifica a existência do negócio.',
-        generatedField: 'problemAndOpportunity' as const,
-      },
-      {
-        title: '5. Solução e Proposta de Valor',
-        blocks: ['Proposta de valor', 'Produto / Serviço'],
-        description: 'Como a solução responde ao problema e por que ela pode ser relevante para o cliente.',
-        generatedField: 'solutionAndValueProposition' as const,
-      },
-      {
-        title: '6. Plano Operacional',
-        blocks: ['Operação básica'],
-        description: 'Primeiros processos, recursos, estrutura necessária e forma de entrega.',
-        generatedField: 'operationsPlan' as const,
-      },
-      {
-        title: '7. Marketing e Vendas',
-        blocks: ['Canais de venda e aquisição', 'Cliente e mercado', 'Crescimento'],
-        description: 'Canais para encontrar clientes, comunicar a oferta e iniciar as primeiras vendas.',
-        generatedField: 'marketingAndSalesPlan' as const,
-      },
-      {
-        title: '8. Financeiro Inicial',
-        blocks: ['Custos', 'Receita'],
-        description: 'Principais custos, fontes de receita e pontos que precisam de validação financeira.',
-        generatedField: 'financialOverview' as const,
-      },
-      {
-        title: '9. Riscos e Próximos Passos',
-        blocks: ['Crescimento', 'Custos', 'Operação básica'],
-        description: 'Incertezas, validações pendentes e ações recomendadas para evoluir o negócio.',
-        generatedField: 'risksAndMitigations' as const,
-      },
-    ];
-
-    // Se a IA (educaimpacto-agents) ja gerou o plano profissional para este
-    // registro, priorizamos o texto gerado em vez das respostas brutas —
-    // ver monolito/supabase/ai-business-plan-contract.md.
-    const generatedPlanContent =
-      generatedBusinessPlan?.status === 'generated' && generatedBusinessPlan.content
-        ? (generatedBusinessPlan.content as { generatedPlan?: Record<string, unknown> }).generatedPlan
-        : undefined;
-    const nextSteps = Array.isArray(generatedPlanContent?.nextSteps)
-      ? (generatedPlanContent.nextSteps as string[])
-      : undefined;
-    const isAiGeneratedPlan = Boolean(generatedPlanContent);
-
-    const sectionsHtml = professionalSections.map((section) => {
-      const generatedText = generatedPlanContent?.[section.generatedField];
-
-      let sectionDraft: string;
-      let sectionSourceLabel: string;
-
-      if (typeof generatedText === 'string' && generatedText.trim()) {
-        sectionDraft = generatedText.trim();
-        sectionSourceLabel = 'Conteúdo gerado por IA';
-      } else {
-        const sectionAnswers = businessPlanAnswers.filter((answer) =>
-          answer.planBlocks.some((block) => section.blocks.includes(block))
-        );
-
-        const sourceText = sectionAnswers
-          .slice(0, 4)
-          .map((answer) => answer.answer.trim())
-          .filter(Boolean)
-          .join(' ');
-
-        sectionDraft = sourceText
-          ? `${section.description} Com base nas informações fornecidas, o plano deve considerar: ${sourceText}`
-          : 'Esta seção será consolidada pela IA assim que houver informações suficientes para análise.';
-        sectionSourceLabel = `${sectionAnswers.length} insumos mapeados`;
-      }
-
-      const nextStepsHtml =
-        section.generatedField === 'risksAndMitigations' && nextSteps?.length
-          ? renderPdfList(nextSteps)
-          : '';
-
-      return `
-        <section class="plan-section">
-          <div class="section-kicker">${escapeHtml(sectionSourceLabel)}</div>
-          <div class="section-title-row">
-            <h2>${escapeHtml(section.title)}</h2>
-          </div>
-          <div class="section-body">
-            ${renderPdfParagraphs(sectionDraft)}
-            ${nextStepsHtml}
-          </div>
-        </section>
-      `;
-    }).join('');
-
-    const summaryItemsHtml = professionalSections
-      .map((section) => `<li><span>${escapeHtml(section.title)}</span></li>`)
-      .join('');
-
-    const planWindow = window.open('', '_blank');
-
-    if (!planWindow) {
-      alert('Nao foi possivel abrir a janela do PDF. Libere pop-ups para baixar o plano.');
-      return;
+  const snapshot = generatedBusinessPlan?.id === activeBusinessPlanId
+    ? generatedBusinessPlan?.content as { modules?: BusinessPlanModuleSnapshot[] } | null
+    : null;
+  const savedModules = Array.isArray(snapshot?.modules) ? snapshot.modules : [];
+  const displayedAnswers = savedModules.flatMap(module => (module.missions ?? []).map(mission => ({
+    ...mission, missionId: String(mission.missionId), moduleId: module.moduleId, moduleTitle: module.moduleTitle,
+  })));
+  useEffect(() => {
+    if (generatedBusinessPlan?.status !== 'generated') return;
+    setBusinessPlanHistory(rows => rows.map(row => row.id === generatedBusinessPlan.id ? {...row,status:'generated'} : row));
+  }, [generatedBusinessPlan]);
+  const openPlan = (id: string) => {
+    setActiveBusinessPlanId(id);
+    setPlanGenerationError(false);
+    setActionMessage('');
+    setScreen('business-plan');
+  };
+  const createProject = async () => {
+    if (!authUser) { setIsAuthModalOpen(true); return; }
+    const name = window.prompt('Nome do novo negócio')?.trim();
+    if (!name || projectBusy) return;
+    if (isUnsafeProposal(name)) { setActionMessage(safetyMessage); return; }
+    setProjectBusy(true);
+    try {
+      const row = await createBusinessProject({name, status:'in_progress'});
+      selectProject(row.id);
+      setEtapaIndex(0);
+      setMissaoIndex(0);
+    } catch {
+      setActionMessage('Não foi possível criar o negócio.');
+      setProjectBusy(false);
     }
-
-    planWindow.document.write(`
-      <!doctype html>
-      <html lang="pt-BR">
-        <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Plano de Negócios Educa Impacto</title>
-          <style>
-            @page { size: A4; margin: 16mm 14mm; }
-            * { box-sizing: border-box; }
-            body {
-              margin: 0;
-              background: #f5faf7;
-              color: #06173C;
-              font-family: Inter, Arial, Helvetica, sans-serif;
-              font-size: 12px;
-              line-height: 1.65;
-            }
-            .page {
-              background: #ffffff;
-              box-shadow: 0 18px 50px rgba(6, 23, 60, 0.12);
-              margin: 0 auto;
-              max-width: 210mm;
-              min-height: 297mm;
-              overflow: hidden;
-            }
-            .cover {
-              background: linear-gradient(135deg, #052254 0%, #0A5740 62%, #329314 100%);
-              color: #ffffff;
-              min-height: 116mm;
-              padding: 20mm 18mm 18mm;
-              position: relative;
-            }
-            .cover::after {
-              border: 1px solid rgba(255, 255, 255, 0.26);
-              border-radius: 999px;
-              content: "";
-              height: 95mm;
-              position: absolute;
-              right: -30mm;
-              top: -32mm;
-              width: 95mm;
-            }
-            .brand-row {
-              align-items: center;
-              display: flex;
-              justify-content: space-between;
-              gap: 18px;
-              position: relative;
-              z-index: 1;
-            }
-            .logo {
-              background: #ffffff;
-              border-radius: 8px;
-              height: 28mm;
-              max-width: 68mm;
-              object-fit: contain;
-              padding: 3mm;
-            }
-            .doc-label {
-              border: 1px solid rgba(255, 255, 255, 0.38);
-              border-radius: 999px;
-              color: #e5f0ea;
-              font-size: 9px;
-              font-weight: 700;
-              letter-spacing: 0.12em;
-              padding: 7px 11px;
-              text-transform: uppercase;
-            }
-            h1 {
-              font-size: 38px;
-              line-height: 1.05;
-              margin: 24mm 0 8px;
-              max-width: 138mm;
-            }
-            .subtitle {
-              margin: 0;
-              color: #e5f0ea;
-              font-size: 15px;
-              max-width: 145mm;
-            }
-            .meta {
-              display: grid;
-              grid-template-columns: repeat(3, 1fr);
-              gap: 8px;
-              margin-top: 15mm;
-              position: relative;
-              z-index: 1;
-            }
-            .meta div {
-              background: rgba(255, 255, 255, 0.12);
-              border: 1px solid rgba(255, 255, 255, 0.22);
-              border-radius: 8px;
-              padding: 10px 12px;
-            }
-            .meta span {
-              display: block;
-              color: #B2C9BF;
-              font-size: 9px;
-              font-weight: 700;
-              letter-spacing: 0.1em;
-              text-transform: uppercase;
-            }
-            .meta strong {
-              display: block;
-              margin-top: 4px;
-              color: #ffffff;
-              font-size: 14px;
-            }
-            .summary {
-              padding: 16mm 18mm 8mm;
-            }
-            .summary h2,
-            .plan-section h2 {
-              color: #052254;
-              font-size: 22px;
-              line-height: 1.2;
-              margin: 0;
-            }
-            .intro-card {
-              border-left: 4px solid #329314;
-              color: #334155;
-              margin-top: 10px;
-              padding: 0 0 0 12px;
-            }
-            .summary-grid {
-              display: grid;
-              gap: 8px;
-              grid-template-columns: repeat(3, 1fr);
-              margin-top: 14px;
-            }
-            .summary-grid li {
-              border: 1px solid #dbe9e2;
-              border-radius: 8px;
-              color: #06173C;
-              font-size: 11px;
-              font-weight: 700;
-              list-style: none;
-              padding: 9px 10px;
-            }
-            .plan-section {
-              break-inside: avoid;
-              padding: 11mm 18mm 0;
-            }
-            .section-kicker {
-              color: #329314;
-              font-size: 9px;
-              font-weight: 700;
-              letter-spacing: 0.12em;
-              margin-bottom: 4px;
-              text-transform: uppercase;
-            }
-            .section-title-row {
-              border-bottom: 2px solid #dbe9e2;
-              margin-bottom: 10px;
-              padding-bottom: 8px;
-            }
-            .section-body p {
-              color: #263244;
-              font-size: 12.5px;
-              margin: 0 0 9px;
-              text-align: justify;
-            }
-            .next-steps {
-              counter-reset: step;
-              display: grid;
-              gap: 8px;
-              margin: 10px 0 0;
-              padding: 0;
-            }
-            .next-steps li {
-              border: 1px solid #dbe9e2;
-              border-radius: 8px;
-              list-style: none;
-              padding: 9px 10px 9px 36px;
-              position: relative;
-            }
-            .next-steps li::before {
-              background: #329314;
-              border-radius: 999px;
-              color: #ffffff;
-              content: counter(step);
-              counter-increment: step;
-              font-size: 10px;
-              font-weight: 700;
-              height: 20px;
-              left: 10px;
-              line-height: 20px;
-              position: absolute;
-              text-align: center;
-              top: 9px;
-              width: 20px;
-            }
-            footer {
-              border-top: 1px solid #dbe9e2;
-              color: #516176;
-              font-size: 11px;
-              margin: 12mm 18mm 0;
-              padding: 8px 0 14mm;
-            }
-            .print-actions {
-              display: flex;
-              gap: 8px;
-              justify-content: center;
-              padding: 16px;
-            }
-            .print-actions button {
-              background: #052254;
-              border: 0;
-              border-radius: 8px;
-              color: #ffffff;
-              cursor: pointer;
-              font-weight: 700;
-              padding: 10px 14px;
-            }
-            @media print {
-              body {
-                background: #ffffff;
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
-              }
-              .page {
-                box-shadow: none;
-                margin: 0;
-                max-width: none;
-                min-height: auto;
-                width: auto;
-              }
-              .print-actions { display: none; }
-            }
-          </style>
-        </head>
-        <body>
-          <main class="page">
-            <section class="cover">
-              <div class="brand-row">
-                <img class="logo" src="/logo-educa-impacto-horizontal.png" alt="Educa Impacto" />
-                <div class="doc-label">${isAiGeneratedPlan ? 'Plano gerado com IA' : 'Rascunho estruturado'}</div>
-              </div>
-              <h1>Plano de Negócios</h1>
-              <p class="subtitle">Documento profissional estruturado a partir da jornada Educa Impacto, com foco em clareza, validação e próximos passos.</p>
-
-              <section class="meta">
-                <div>
-                  <span>Perfil</span>
-                  <strong>${escapeHtml(activeDiagnosticData.nivel)}</strong>
-                </div>
-                <div>
-                  <span>Base analisada</span>
-                  <strong>${businessPlanAnswers.length} de ${TOTAL_MISSIONS} respostas</strong>
-                </div>
-                <div>
-                  <span>Emissão</span>
-                  <strong>${escapeHtml(generatedAt)}</strong>
-                </div>
-              </section>
-            </section>
-
-            <section class="summary">
-              <h2>Estrutura do documento</h2>
-              <p class="intro-card">
-                Este plano organiza as informações fornecidas em uma linguagem executiva, pronta para apoiar validação,
-                apresentação da ideia e tomada de decisão sobre os próximos passos do negócio.
-              </p>
-              <ol class="summary-grid">
-                ${summaryItemsHtml}
-              </ol>
-            </section>
-
-            ${sectionsHtml || '<p>Nenhuma resposta adequada foi encontrada para compor o plano.</p>'}
-
-            <footer>
-              Documento gerado pela plataforma Educa Impacto. Recomenda-se validar informações financeiras,
-              legais e operacionais antes de decisões comerciais.
-            </footer>
-          </main>
-          <div class="print-actions">
-            <button type="button" onclick="window.print()">Baixar / imprimir PDF</button>
-          </div>
-          <script>
-            window.addEventListener('load', () => {
-              window.focus();
-              window.print();
-            });
-          </script>
-        </body>
-      </html>
-    `);
-    planWindow.document.close();
+  };
+  const checkout = async () => {
+    if (!activeBusinessPlanId || !authUser || !generatedPlanContent || !isCompletePlan(generatedPlanContent)) return;
+    setProjectBusy(true);
+    setActionMessage('');
+    try {
+      const {data,error} = await supabase.functions.invoke('plan-checkout', {body:{planId:activeBusinessPlanId}});
+      if (error) throw error;
+      if (data.paid) {
+        const {downloadPlan} = await import('./services/planPdf');
+        downloadPlan(generatedPlanContent, projects.find(p=>p.id===generatedBusinessPlan?.project_id)?.name ?? generatedBusinessPlan!.title, authUser.user_metadata.full_name || authUser.email || 'Não informado', generatedBusinessPlan!.version);
+      } else if (data.url) location.assign(data.url);
+      else throw new Error();
+    } catch { setActionMessage('Pagamento indisponível. Tente novamente em instantes.'); }
+    finally { setProjectBusy(false); }
   };
 
   const handleGenerateBusinessPlan = async () => {
+    if (hasUnsafePlanText(respostas)) {
+      setActionMessage(safetyMessage);
+      return;
+    }
     if (!authUser || !activeProjectId) {
       setAuthModalMode('signin');
       setAuthMessage('Entre ou crie uma conta para salvar suas respostas no Supabase e preparar o plano para a IA.');
@@ -1273,6 +945,7 @@ export default function App() {
       return;
     }
 
+    setActiveBusinessPlanId(null);
     setScreen('business-plan');
     setIsPreparingPlan(true);
     setPlanGenerationError(false);
@@ -1286,6 +959,7 @@ export default function App() {
     const answeredQuestions = modulesSnapshot.reduce((total, module) => total + module.answeredQuestions, 0);
 
     try {
+      if (answeredQuestions !== TOTAL_MISSIONS) { setScreen('dashboard'); setActionMessage('Revise as respostas pendentes antes de gerar o plano.'); return; }
       const savedPlan = await createBusinessPlanSnapshot({
         project_id: activeProjectId,
         title: 'Plano de negocios Educa Impacto',
@@ -1319,7 +993,7 @@ export default function App() {
               'marketingAndSalesPlan',
               'financialOverview',
               'risksAndMitigations',
-              'nextSteps',
+              'nextSteps', 'pessimisticScenario', 'baseScenario', 'optimisticScenario', 'strategicAssessment', 'microcreditRecommendation',
             ],
           },
         }),
@@ -1458,12 +1132,11 @@ export default function App() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen" data-build={APP_BUILD_MARKER}>
-      {screen !== 'landing' && (
+    <div className="min-h-screen pt-16" data-build={APP_BUILD_MARKER}>
         <AppHeader
           onHome={handleGoHome}
           onAbout={handleOpenAbout}
-          onOpenModules={handleOpenModules}
+          onStart={() => setScreen('start')}
           userEmail={authUser?.email ?? null}
           onAuthClick={() => {
             setAuthModalMode('signin');
@@ -1472,7 +1145,6 @@ export default function App() {
           }}
           onSignOut={handleSignOut}
         />
-      )}
 
       {isPreparingPlan && (
         <div className="border-b border-[#dbe9e2] bg-[#f5faf7] px-4 py-2 text-center text-xs font-semibold text-[#052254]">
@@ -1491,11 +1163,27 @@ export default function App() {
       />
 
       {screen === 'landing' && (
-        <LandingPage onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />
+        <LandingPage onStart={() => setScreen('start')} />
+      )}
+
+      {screen === 'start' && (
+        <main className="mx-auto max-w-2xl px-5 py-16 text-[#052254]">
+          <h1 className="mb-8 text-3xl font-bold sm:text-4xl">Por onde você quer começar?</h1>
+          <section className="border-t border-[#B2C9BF] py-7">
+            <h2 className="text-xl font-bold">Quero entender meu ponto de partida</h2>
+            <p className="mt-2 mb-5 text-[#50635b]">Responda ao diagnóstico para conhecer seu perfil empreendedor antes de iniciar a trilha.</p>
+            <Button onClick={() => setScreen('diagnostic')}>Fazer diagnóstico</Button>
+          </section>
+          <section className="border-t border-[#B2C9BF] py-7">
+            <h2 className="text-xl font-bold">Quero trabalhar na minha ideia</h2>
+            <p className="mt-2 mb-5 text-[#50635b]">Comece pelas missões. Suas respostas serão a base do plano de negócios.</p>
+            <Button variant="outline" onClick={handleOpenModules}>Ir direto aos módulos</Button>
+          </section>
+        </main>
       )}
 
       {screen === 'about' && (
-        <AboutScreen onStart={() => setScreen('diagnostic')} onOpenModules={handleOpenModules} />
+        <AboutScreen onStart={() => setScreen('start')} />
       )}
 
       {screen === 'diagnostic' && (
@@ -1517,7 +1205,26 @@ export default function App() {
         />
       )}
 
-      {screen === 'dashboard' && (
+      {actionMessage && <p role="status" className="p-3 text-center">{actionMessage}</p>}
+      {blockedPlan && (screen === 'payment' || screen === 'business-plan') && (
+        <main className="mx-auto max-w-xl space-y-5 px-5 py-16">
+          <h1 className="text-3xl font-bold">Plano bloqueado</h1>
+          <p>{safetyMessage}</p>
+          <Button onClick={handleOpenModules}>Voltar aos módulos</Button>
+        </main>
+      )}
+      {screen === 'payment' && !blockedPlan && <main className="mx-auto max-w-xl space-y-5 px-5 py-16">
+        <h1 className="text-3xl font-bold">PDF do plano de negócios</h1>
+        <p>Pagamento único de R$ 29,90 por versão. Após a confirmação, você pode baixar esta versão novamente.</p>
+        {authUser ? <Button disabled={projectBusy || !isCompletePlan(generatedPlanContent)} onClick={checkout}>Continuar para pagamento ou baixar PDF pago</Button> : <Button onClick={() => setIsAuthModalOpen(true)}>Entrar</Button>}
+      </main>}
+      {screen === 'dashboard' && <> 
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 p-4">
+          {projects.length > 0 && authUser && <label>Negócio <select disabled={projectBusy} value={activeProjectId ?? ''} onChange={e => {setProjectBusy(true); selectProject(e.target.value);}}>{projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
+          <Button disabled={projectBusy} onClick={createProject}>Criar novo Negócio</Button>
+        </div>
+      </>}
+      {screen === 'dashboard' && !projectBusy && (
         <DashboardScreen
           level={nivel}
           xp={xp}
@@ -1527,6 +1234,7 @@ export default function App() {
           totalMissions={TOTAL_MISSIONS}
           completedMissions={completedMissionCount}
           canGeneratePlan={completedMissionCount === TOTAL_MISSIONS}
+          onOpenPlan={openPlan}
           businessPlanHistory={businessPlanHistory}
           onModuleClick={handleModuleClick}
           onGeneratePlan={handleGenerateBusinessPlan}
@@ -1535,6 +1243,8 @@ export default function App() {
 
       {screen === 'mission' && missaoAtual && (
         <MissionScreen
+          key={(authUser?.id ?? "guest") + ":" + missaoAtual.id}
+          draftKey={["educa-impacto-draft", activeProjectId ?? authUser?.id ?? "guest", missaoAtual.id].join(":")}
           mission={missaoAtual}
           progress={progresso}
           totalMissions={TOTAL_MISSIONS}
@@ -1560,7 +1270,7 @@ export default function App() {
       )}
 
       {screen === 'mission' && !missaoAtual && (
-        <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] to-white flex items-center justify-center px-4">
+        <div className="min-h-screen bg-[#f5faf7] flex items-center justify-center px-4">
           <p className="text-sm font-medium text-gray-600">Preparando sua primeira missão...</p>
         </div>
       )}
@@ -1594,18 +1304,16 @@ export default function App() {
         />
       )}
 
-      {screen === 'business-plan' && (
+      {screen === 'business-plan' && !blockedPlan && (
         <BusinessPlanScreen
           diagnosticData={activeDiagnosticData}
-          answers={businessPlanAnswers}
-          moduleAnswerTargets={ETAPAS.map((etapa) => ({
+          answers={activeBusinessPlanId ? displayedAnswers : businessPlanAnswers}
+          moduleAnswerTargets={savedModules.length ? savedModules.map(m => ({moduleId:m.moduleId,title:m.moduleTitle,total:m.totalQuestions})) : ETAPAS.map((etapa) => ({
             moduleId: etapa.id,
             title: etapa.label,
             total: etapa.missions.length,
           }))}
-          onDownload={handleDownloadPlan}
-          onEditAnswer={(missionId) => handleEditAnswer(missionId, 'business-plan')}
-          onShare={() => alert('Compartilhamento disponível em breve!')}
+          onDownload={() => setScreen('payment')}
           onBackToDashboard={handleOpenModules}
           generationStatus={
             planGenerationError
@@ -1616,11 +1324,7 @@ export default function App() {
                   : planGenerationStatus
                 : 'idle'
           }
-          generatedPlan={
-            generatedBusinessPlan?.status === 'generated'
-              ? (generatedBusinessPlan.content as { generatedPlan?: GeneratedBusinessPlanContent }).generatedPlan
-              : undefined
-          }
+          generatedPlan={generatedPlanContent}
         />
       )}
 

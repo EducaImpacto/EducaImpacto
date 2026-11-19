@@ -23,7 +23,7 @@ export function ProgressBar({ progress, showLabel = true, height = 'md' }: Progr
       )}
       <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${heights[height]}`}>
         <div
-          className="h-full bg-gradient-to-r from-[#052254] via-[#0A5740] to-[#329314] transition-all duration-500 ease-out"
+          className="h-full bg-[#0A5740] transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>

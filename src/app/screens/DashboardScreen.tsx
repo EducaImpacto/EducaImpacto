@@ -25,6 +25,7 @@ interface DashboardScreenProps {
   canGeneratePlan: boolean;
   businessPlanHistory: BusinessPlanHistoryItem[];
   onModuleClick: (moduleId: number) => void;
+  onOpenPlan: (id: string) => void;
   onGeneratePlan: () => void;
 }
 
@@ -39,6 +40,7 @@ export function DashboardScreen({
   canGeneratePlan,
   businessPlanHistory,
   onModuleClick,
+  onOpenPlan,
   onGeneratePlan,
 }: DashboardScreenProps) {
   const completedModules = modules.filter((module) => module.completed).length;
@@ -51,65 +53,15 @@ export function DashboardScreen({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] to-[#f5faf7]">
+    <div className="min-h-screen bg-[#f5faf7]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <div className="flex items-center justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Progresso Geral</h2>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-[#052254]">{overallProgress}%</div>
-                  <div className="text-xs text-gray-500">da trilha</div>
-                </div>
-              </div>
-              <ProgressBar progress={overallProgress} height="lg" />
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-gray-600">{completedMissions} de {totalMissions} missões concluídas</span>
-                <span className="font-semibold text-[#052254]">{completedModules} de {modules.length} etapas completas</span>
-              </div>
-            </div>
-
-            {nextModule && (
-              <div className="bg-gradient-to-r from-[#052254] to-[#0A5740] rounded-2xl shadow-lg p-8 text-white">
-                <h2 className="text-2xl font-bold mb-2">Continue sua próxima missão</h2>
-                <p className="text-[#e5f0ea] mb-6">
-                  Próxima etapa liberada: {nextModule.title}. Cada resposta aproxima seu plano de negócios da versão final.
-                </p>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={() => onModuleClick(nextModule.id)}
-                  className="!bg-white !text-[#052254] hover:!bg-[#f5faf7]"
-                >
-                  Continuar Trilha
-                </Button>
-              </div>
-            )}
-
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Etapas da Trilha Iniciante</h2>
-              <div className="space-y-4">
-                {modules.map((module) => (
-                  <ModuleCard
-                    key={module.id}
-                    title={module.title}
-                    description={`${module.description} (${module.missions.length} missões)`}
-                    completed={module.completed}
-                    locked={module.locked}
-                    onClick={() => onModuleClick(module.id)}
-                  />
-                ))}
-              </div>
-            </div>
-
             <div
-              className={`rounded-2xl shadow-lg p-8 text-white ${
+              className={`rounded-lg border border-[#d8e7df] p-8 text-white ${
                 canGeneratePlan
-                  ? 'bg-gradient-to-r from-[#0A5740] to-[#329314]'
-                  : 'bg-gradient-to-r from-[#3B8528] to-[#329314]'
+                  ? 'bg-[#0A5740]'
+                  : 'bg-orange-800'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -122,7 +74,6 @@ export function DashboardScreen({
 
                       <p className="text-[#e5f0ea] mb-6">
                         Você completou todas as missões! A IA vai organizar suas respostas em um plano estruturado.
-                        Para salvar e gerar pelo backend, entre na sua conta.
                       </p>
 
                       <Button
@@ -149,15 +100,63 @@ export function DashboardScreen({
                 </div>
               </div>
             </div>
+            <div className="bg-white rounded-lg border border-[#d8e7df] p-6">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Progresso Geral</h2>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-[#052254]">{overallProgress}%</div>
+                  <div className="text-xs text-gray-500">da trilha</div>
+                </div>
+              </div>
+              <ProgressBar progress={overallProgress} height="lg" />
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="text-gray-600">{completedMissions} de {totalMissions} missões concluídas</span>
+                <span className="font-semibold text-[#052254]">{completedModules} de {modules.length} etapas completas</span>
+              </div>
+            </div>
+
+            {nextModule && (
+              <div className="border-l-4 border-[#0A5740] bg-[#f2f8f4] p-5 text-[#052254] sm:p-7">
+                <p className="mb-2 text-sm font-semibold text-[#0A5740]">Seu próximo módulo</p>
+                <h2 className="mb-2 text-2xl font-bold">{nextModule.title}</h2>
+                <p className="mb-5 text-[#50635b]">{nextModule.description}</p>
+                <Button
+                  size="lg"
+                  onClick={() => onModuleClick(nextModule.id)}
+                >
+                  Abrir módulo
+                </Button>
+              </div>
+            )}
+
+            <div className="bg-white rounded-lg border border-[#d8e7df] p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Etapas da Trilha Iniciante</h2>
+              <div className="space-y-4">
+                {modules.map((module) => (
+                  <ModuleCard
+                    key={module.id}
+                    title={module.title}
+                    description={`${module.description} (${module.missions.length} missões)`}
+                    completed={module.completed}
+                    locked={module.locked}
+                    onClick={() => onModuleClick(module.id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+
           </div>
 
           <div className="space-y-6">
             <LevelIndicator level={level} xp={xp} nextLevelXp={nextLevelXp} />
 
-            <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="bg-white rounded-lg border border-[#d8e7df] p-6">
               <div className="flex items-center gap-2 mb-4">
                 <BarChart3 className="w-5 h-5 text-[#052254]" />
-                <h3 className="font-bold text-gray-900">Indicadores MVP</h3>
+                <h3 className="font-bold text-gray-900">Resumo da trilha</h3>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
@@ -179,14 +178,14 @@ export function DashboardScreen({
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="bg-white rounded-lg border border-[#d8e7df] p-6">
               <div className="flex items-center gap-2 mb-4">
                 <History className="w-5 h-5 text-gray-600" />
                 <h3 className="font-bold text-gray-900">Planos salvos</h3>
               </div>
               {businessPlanHistory.length > 0 ? (
                 <div className="space-y-3">
-                  {businessPlanHistory.slice(0, 4).map((plan) => (
+                  {businessPlanHistory.map((plan) => (
                     <div key={plan.id} className="rounded-xl border border-gray-100 bg-[#f5faf7] p-3">
                       <div className="flex items-center justify-between gap-3">
                         <div>
@@ -197,6 +196,7 @@ export function DashboardScreen({
                           {statusLabels[plan.status] ?? plan.status}
                         </span>
                       </div>
+                      {plan.status === 'generated' && <button className="mt-2 font-semibold text-[#052254] underline" onClick={() => onOpenPlan(plan.id)}>Abrir plano</button>}
                       <div className="mt-2 text-xs text-gray-500">
                         {new Intl.DateTimeFormat('pt-BR', {
                           day: '2-digit',
@@ -216,7 +216,7 @@ export function DashboardScreen({
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-[#e5f0ea] to-[#e5f0ea] rounded-2xl p-6 border-2 border-[#B2C9BF]">
+            <div className="bg-[#e5f0ea] rounded-lg p-6 border-2 border-[#B2C9BF]">
               <div className="flex items-start gap-3">
                 <Sparkles className="w-6 h-6 text-[#052254] flex-shrink-0 mt-1" />
                 <div>

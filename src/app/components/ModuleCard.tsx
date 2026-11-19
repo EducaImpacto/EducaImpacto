@@ -16,7 +16,7 @@ export function ModuleCard({ title, description, completed, locked, onClick }: M
       className={`
         p-6 rounded-xl border-2 transition-all duration-200
         ${completed ? 'border-[#329314] bg-[#f5faf7]' : 'border-gray-200 bg-white'}
-        ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:border-[#052254]'}
+        ${locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-sm hover:border-[#052254]'}
       `}
     >
       <div className="flex items-start justify-between">

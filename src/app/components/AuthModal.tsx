@@ -74,7 +74,7 @@ export function AuthModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#06173C]/60 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-sm">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-[#06173C]">

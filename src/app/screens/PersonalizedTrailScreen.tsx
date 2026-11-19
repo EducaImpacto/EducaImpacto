@@ -68,8 +68,8 @@ export function PersonalizedTrailScreen({
   const totalXP = beginnerModules.reduce((total, module) => total + module.xp, 0) + 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f5faf7] via-[#f5faf7] to-[#f5faf7]">
-      <section className="bg-gradient-to-r from-[#052254] via-[#06173C] to-[#0A5740] text-white py-16">
+    <div className="min-h-screen bg-[#f5faf7]">
+      <section className="bg-[#052254] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
@@ -96,15 +96,15 @@ export function PersonalizedTrailScreen({
             </div>
 
             <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="bg-[#153763] rounded-lg p-6">
                 <div className="text-3xl font-bold mb-2">4</div>
                 <div className="text-[#e5f0ea]">Etapas interativas</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="bg-[#153763] rounded-lg p-6">
                 <div className="text-3xl font-bold mb-2">20</div>
                 <div className="text-[#e5f0ea]">Missões práticas</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="bg-[#153763] rounded-lg p-6">
                 <div className="text-3xl font-bold mb-2">{totalXP}</div>
                 <div className="text-[#e5f0ea]">XP disponível</div>
               </div>
@@ -131,9 +131,9 @@ export function PersonalizedTrailScreen({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden ring-1 ring-[#B2C9BF]"
+              className="bg-white rounded-lg shadow-sm overflow-hidden ring-1 ring-[#B2C9BF]"
             >
-              <div className="bg-gradient-to-r from-[#052254] to-[#0A5740] text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2">
+              <div className="bg-[#052254] text-white text-sm font-semibold py-2 px-4 flex items-center justify-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Etapa {index + 1} de 4
               </div>
@@ -192,7 +192,7 @@ export function PersonalizedTrailScreen({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="bg-gradient-to-r from-[#329314] to-[#329314] rounded-3xl p-8 md:p-12 text-white text-center"
+          className="bg-[#329314] rounded-lg p-8 md:p-12 text-white text-center"
         >
           <h2 className="text-3xl font-bold mb-4">
             Pronto para dar o primeiro passo no seu negócio?

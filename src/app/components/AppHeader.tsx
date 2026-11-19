@@ -1,20 +1,20 @@
 import React from 'react';
-import { Home, Info, LayoutGrid, LogOut, UserRound } from 'lucide-react';
+import { Home, Info, ArrowRight, LogOut, UserRound } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
 interface AppHeaderProps {
   onHome: () => void;
   onAbout: () => void;
-  onOpenModules: () => void;
+  onStart: () => void;
   userEmail?: string | null;
   onAuthClick: () => void;
   onSignOut: () => void;
 }
 
-export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthClick, onSignOut }: AppHeaderProps) {
+export function AppHeader({ onHome, onAbout, onStart, userEmail, onAuthClick, onSignOut }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-[60] border-b border-[#dbe9e2] bg-white/95 shadow-sm backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
+    <header className="fixed inset-x-0 top-0 h-16 z-[60] border-b border-[#dbe9e2] bg-white">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={onHome}
@@ -31,7 +31,7 @@ export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthCli
             className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
           >
             <Home className="h-4 w-4" />
-            <span className="hidden sm:inline">Home</span>
+            <span className="sr-only sm:not-sr-only">Home</span>
           </button>
 
           <button
@@ -40,16 +40,16 @@ export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthCli
             className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
           >
             <Info className="h-4 w-4" />
-            <span className="hidden sm:inline">Quem somos</span>
+            <span className="sr-only sm:not-sr-only">Quem somos</span>
           </button>
 
           <button
             type="button"
-            onClick={onOpenModules}
+            onClick={onStart}
             className="inline-flex h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-[#052254] transition-colors hover:bg-[#e5f0ea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
           >
-            <LayoutGrid className="h-4 w-4" />
-            <span className="hidden sm:inline">Módulos</span>
+            <ArrowRight className="h-4 w-4" />
+            <span className="sr-only sm:not-sr-only">Começar</span>
           </button>
 
           {userEmail ? (
@@ -60,7 +60,7 @@ export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthCli
               title={userEmail}
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sair</span>
+              <span className="sr-only sm:not-sr-only">Sair</span>
             </button>
           ) : (
             <button
@@ -69,7 +69,7 @@ export function AppHeader({ onHome, onAbout, onOpenModules, userEmail, onAuthCli
               className="inline-flex h-10 items-center gap-2 rounded-md bg-[#052254] px-2 text-sm font-semibold text-white transition-colors hover:bg-[#06173C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#329314] focus-visible:ring-offset-2 sm:px-3"
             >
               <UserRound className="h-4 w-4" />
-              <span className="hidden sm:inline">Entrar</span>
+              <span className="sr-only sm:not-sr-only">Entrar</span>
             </button>
           )}
         </nav>

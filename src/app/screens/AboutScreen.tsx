@@ -5,15 +5,14 @@ import { BrandLogo } from '../components/BrandLogo';
 
 interface AboutScreenProps {
   onStart: () => void;
-  onOpenModules: () => void;
 }
 
-export function AboutScreen({ onStart, onOpenModules }: AboutScreenProps) {
+export function AboutScreen({ onStart }: AboutScreenProps) {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-[#f5faf7] to-white">
+    <main className="min-h-screen bg-[#f2f8f4] text-[#052254]">
       <section className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-20">
         <div className="flex justify-center lg:justify-start">
-          <div className="rounded-3xl border border-[#dbe9e2] bg-white p-8 shadow-xl">
+          <div className="max-w-full">
             <BrandLogo className="h-36 w-auto sm:h-44 lg:h-52" />
           </div>
         </div>
@@ -34,11 +33,8 @@ export function AboutScreen({ onStart, onOpenModules }: AboutScreenProps) {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button onClick={onStart} size="lg">
-              Começar diagnóstico
+              Começar
               <ArrowRight className="ml-2 inline h-5 w-5" />
-            </Button>
-            <Button variant="outline" size="lg" onClick={onOpenModules}>
-              Ver módulos
             </Button>
           </div>
         </div>
@@ -63,8 +59,8 @@ export function AboutScreen({ onStart, onOpenModules }: AboutScreenProps) {
               text: 'Um caminho para gerar autonomia, clareza e oportunidades com apoio de tecnologia.',
             },
           ].map((item) => (
-            <article key={item.title} className="rounded-2xl bg-[#f5faf7] p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#052254] to-[#329314] text-white">
+            <article key={item.title} className="rounded-lg bg-[#f5faf7] p-6">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#052254] text-white">
                 <item.icon className="h-6 w-6" />
               </div>
               <h2 className="mb-2 text-xl font-bold text-[#06173C]">{item.title}</h2>
@@ -91,7 +87,7 @@ export function AboutScreen({ onStart, onOpenModules }: AboutScreenProps) {
               'Sincronização das respostas com o Supabase para manter o progresso salvo.',
               'Base de dados pronta para alimentar a IA no momento de gerar o plano.',
             ].map((text) => (
-              <div key={text} className="flex items-start gap-3 rounded-2xl border border-[#dbe9e2] bg-white p-4">
+              <div key={text} className="flex items-start gap-3 rounded-lg border border-[#dbe9e2] bg-white p-4">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#329314]" />
                 <p className="text-sm font-medium text-gray-700">{text}</p>
               </div>
@@ -100,7 +96,7 @@ export function AboutScreen({ onStart, onOpenModules }: AboutScreenProps) {
         </div>
       </section>
 
-      <section className="bg-gradient-to-r from-[#052254] via-[#0A5740] to-[#329314] py-16 text-white">
+      <section className="bg-[#052254] py-16 text-white">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
           <div className="flex items-center gap-4">
             <BrainCircuit className="h-9 w-9" />
