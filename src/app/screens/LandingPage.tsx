@@ -98,7 +98,7 @@ function BusinessPlanDocument() {
   ];
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl">
+    <div className="home-plan-sheet relative mx-auto w-full max-w-2xl">
       <div className="border border-[#d8e7df] bg-white p-6 text-[#052254] shadow-sm sm:p-8">
         <div className="flex items-center justify-between border-b border-[#d8e7df] pb-5">
           <div className="flex items-center gap-3">

@@ -27,11 +27,13 @@
 
 .home-float { position: relative; margin: 1.5rem 0 0; }
 .home-preview { box-shadow: 0 18px 46px -20px #05225455, 0 3px 10px #0522540c; }
-.educa-home #resultado .relative > .border { border-radius: 8px; box-shadow: 0 22px 54px -24px #05225438; }
+.home-plan-sheet { padding-inline: 6px; transform: rotate(-0.7deg); }
+.home-plan-sheet > .border { border-radius: 8px; box-shadow: 0 22px 54px -24px #05225438; }
 .educa-home #microcredito article { border-radius: 8px; box-shadow: 0 9px 32px -23px #05225455; }
 .educa-home .text-xs.text-\[\#329314\] { color: var(--educa-verde-escuro); }
 
 @media (min-width: 1024px) {
+  .home-plan-sheet { transform: rotate(-2deg); }
   .home-composition { height: 500px; }
   .home-photo { position: absolute; inset: 0 12px 40px 20%; aspect-ratio: auto; }
   .home-caption { inset: 0 0 auto; padding: 1.5rem 1.5rem 3rem; background: linear-gradient(#06173ce8, transparent); }
